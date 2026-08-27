@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Two-Phone Test Environment</title>
+  <style>
+    :root {
+      --bg: #edf1f4;
+      --panel: rgba(255, 255, 255, 0.9);
+      --ink: #0a1628;
+      --mute: #5a6a7a;
+      --ok: #0f6e6e;
+      --bad: #b42318;
+      --warn: #a16207;
+      --line: #cfd8e0;
+      --accent: #0f6e6e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Manrope", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse 80% 55% at 12% -10%, rgba(15, 110, 110, 0.14), transparent 55%),
+        linear-gradient(165deg, #f4f7f9 0%, #e8eef2 48%, #dfe8ec 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 1.25rem;
+    }
+    body.embed {
+      background: transparent;
+      min-height: 0;
+      padding: 0.5rem 0.25rem 1rem;
+    }
+    body.embed .chrome-title { display: none; }
+    h1 {
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin: 0 0 0.35rem;
+      text-align: center;
+    }
+    .sub {
+      text-align: center;
+      color: var(--mute);
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      max-width: 960px;
+      margin: 0 auto 1rem;
+    }
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 1rem;
+    }
+    .card h2 {
+      margin: 0 0 0.75rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+    }
+    .qr {
+      display: flex;
+      justify-content: center;
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 0.75rem;
+      min-height: 216px;
+      align-items: center;
+      position: relative;
+    }
+    .qr img {
+      width: 200px;
+      height: 200px;
+      display: block;
+      background: #fff;
+      image-rendering: pixelated;
+    }
+    .qr .qr-fallback {
+      font-size: 0.75rem;
+      color: var(--bad);
+      text-align: center;
+      max-width: 14rem;
+      line-height: 1.35;
+    }
+    .qr .qr-loading {
+      font-size: 0.75rem;
+      color: var(--mute);
+    }
+    .meta { margin-top: 0.75rem; font-size: 0.82rem; color: var(--mute); word-break: break-all; }
+    .dot { display: inline-block; width: 0.55rem; height: 0.55rem; border-radius: 50%; margin-right: 0.35rem; background: var(--bad); }
+    .dot.on { background: var(--ok); }
+    .dot.warn { background: var(--warn); }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin: 0.75rem auto;
+      max-width: 960px;
+    }
+    label { font-size: 0.8rem; color: var(--mute); }
+    select, button, input {
+      font: inherit;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 0.4rem 0.65rem;
+    }
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      font-weight: 600;
+    }
+    button.secondary { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+    button.danger { background: var(--bad); color: #fff; }
+    .panel {
+      max-width: 960px;
+      margin: 0 auto 1rem;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 1rem;
+    }
+    .panel h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+    .utter {
+      font-size: 0.9rem;
+      margin-bottom: 0.65rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .utter:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+    .log {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.72rem;
+      max-height: 220px;
+      overflow: auto;
+      white-space: pre-wrap;
+      color: #3a4a5a;
+      background: #f4f7f9;
+      border: 1px solid var(--line);
+      padding: 0.65rem;
+    }
+    .banner {
+      max-width: 960px;
+      margin: 0 auto 1rem;
+      padding: 0.65rem 0.85rem;
+      background: rgba(15, 110, 110, 0.08);
+      border: 1px solid rgba(15, 110, 110, 0.25);
+      font-size: 0.85rem;
+    }
+    .banner.warn {
+      background: rgba(161, 98, 7, 0.08);
+      border-color: rgba(161, 98, 7, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="chrome-title">
+  <h1>Two-Phone Test Environment</h1>
+  <p class="sub">Laptop hub · real STT → translate → TTS pipeline</p>
+  </div>
+  <div id="banner" class="banner">Starting session…</div>
+
+  <div class="row">
+    <label>LAN address for QR
+      <select id="lanSelect"></select>
+    </label>
+    <button type="button" id="btnNew" class="secondary">New session</button>
+    <button type="button" id="btnEnd" class="danger">End session</button>
+    <button type="button" id="btnSim" class="secondary">Run text self-test</button>
+  </div>
+
+  <div class="panel">
+    <h3>Session</h3>
+    <div id="sessionMeta">—</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Phone A · Caller A</h2>
+      <div class="qr" id="qrWrapA">
+        <span class="qr-loading" id="qrLoadA">Generating QR…</span>
+        <img id="qrA" alt="QR code for Phone A" width="200" height="200" hidden />
+      </div>
+      <div class="meta" id="urlA"></div>
+      <div class="meta" id="statusA"><span class="dot"></span> Connected: No</div>
+      <div class="meta" id="langA">Language: —</div>
+    </div>
+    <div class="card">
+      <h2>Phone B · Caller B</h2>
+      <div class="qr" id="qrWrapB">
+        <span class="qr-loading" id="qrLoadB">Generating QR…</span>
+        <img id="qrB" alt="QR code for Phone B" width="200" height="200" hidden />
+      </div>
+      <div class="meta" id="urlB"></div>
+      <div class="meta" id="statusB"><span class="dot"></span> Connected: No</div>
+      <div class="meta" id="langB">Language: —</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>A → B</h3>
+    <div class="utter" id="abBox">No utterances yet.</div>
+    <h3>B → A</h3>
+    <div class="utter" id="baBox">No utterances yet.</div>
+  </div>
+
+  <div class="panel">
+    <h3>Audio / latency</h3>
+    <div id="audioMeta">A → B: idle · B → A: idle</div>
+  </div>
+
+  <div class="panel">
+    <h3>Debug log</h3>
+    <div class="log" id="logBox"></div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let session = null;
+    let ws = null;
+    let selectedHost = "";
+
+    function schemeHost() {
+      return location.origin;
+    }
+
+    function phoneHost() {
+      const sel = $("lanSelect").value;
+      if (!sel) return schemeHost();
+      const u = new URL(schemeHost());
+      return `${u.protocol}//${sel}${u.port ? ":" + u.port : ""}`;
+    }
+
+    function setBanner(text, warn) {
+      const el = $("banner");
+      el.textContent = text;
+      el.className = "banner" + (warn ? " warn" : "");
+    }
+
+    function renderUtter(el, u, avg) {
+      if (!u) {
+        el.textContent = "No utterances yet.";
+        return;
+      }
+      const err = u.error ? `\nError: ${u.error}` : "";
+      el.innerHTML = `
+        <div><strong>Last text:</strong> ${escapeHtml(u.source_text || "")}</div>
+        <div><strong>Translation:</strong> ${escapeHtml(u.translated_text || "")}</div>
+        <div><strong>Latency:</strong> ${u.latency_sec}s · avg ${avg}s</div>
+        ${err ? `<div style="color:var(--bad)">${escapeHtml(err)}</div>` : ""}
+      `;
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function drawQr(imgEl, url, loadEl) {
+      if (!imgEl || !url) return;
+      if (loadEl) {
+        loadEl.hidden = false;
+        loadEl.textContent = "Generating QR…";
+        loadEl.className = "qr-loading";
+      }
+      imgEl.hidden = true;
+
+      const qs = "data=" + encodeURIComponent(url) + "&t=" + Date.now();
+      const pngUrl = location.origin + "/test/api/qr.png?" + qs;
+      const svgUrl = location.origin + "/test/api/qr.svg?" + qs;
+
+      const showFail = (msg) => {
+        imgEl.hidden = true;
+        if (loadEl) {
+          loadEl.hidden = false;
+          loadEl.className = "qr-fallback";
+          loadEl.textContent = msg || "QR failed — open the URL below on the phone";
+        }
+        console.error("QR image failed for", url);
+      };
+
+      const showOk = (objectUrl) => {
+        if (imgEl._objUrl) {
+          try { URL.revokeObjectURL(imgEl._objUrl); } catch (_) {}
+        }
+        imgEl._objUrl = objectUrl;
+        imgEl.onload = () => {
+          imgEl.hidden = false;
+          if (loadEl) loadEl.hidden = true;
+        };
+        imgEl.onerror = () => showFail("QR image decode failed — use URL below");
+        imgEl.src = objectUrl;
+      };
+
+      // Prefer PNG blob (reliable in iframes). Fall back to SVG, then direct PNG src.
+      fetch(pngUrl, { cache: "no-store" })
+        .then((res) => {
+          if (!res.ok) throw new Error("png " + res.status);
+          return res.blob();
+        })
+        .then((blob) => showOk(URL.createObjectURL(blob)))
+        .catch(() =>
+          fetch(svgUrl, { cache: "no-store" })
+            .then((res) => {
+              if (!res.ok) throw new Error("svg " + res.status);
+              return res.blob();
+            })
+            .then((blob) => showOk(URL.createObjectURL(blob)))
+            .catch(() => {
+              imgEl.onerror = () => showFail("QR failed — use the URL below on the phone");
+              imgEl.onload = () => {
+                imgEl.hidden = false;
+                if (loadEl) loadEl.hidden = true;
+              };
+              imgEl.src = pngUrl;
+            })
+        );
+    }
+
+    function renderState(state) {
+      session = state;
+      if (!state) return;
+      const host = phoneHost();
+      const finalA = `${host}/test/${state.session_id}/A?token=${state.token_a}`;
+      const finalB = `${host}/test/${state.session_id}/B?token=${state.token_b}`;
+
+      $("sessionMeta").textContent = `SESSION ${state.session_id} · expires ${new Date(state.expires_at * 1000).toLocaleTimeString()}`;
+      $("urlA").textContent = finalA;
+      $("urlB").textContent = finalB;
+      drawQr($("qrA"), finalA, $("qrLoadA"));
+      drawQr($("qrB"), finalB, $("qrLoadB"));
+
+      const a = state.phone_a;
+      const b = state.phone_b;
+      $("statusA").innerHTML = `<span class="dot ${a.connected ? "on" : ""}"></span> Connected: ${a.connected ? "Yes" : "No"}`;
+      $("statusB").innerHTML = `<span class="dot ${b.connected ? "on" : ""}"></span> Connected: ${b.connected ? "Yes" : "No"}`;
+      $("langA").textContent = `Language: ${a.input_lang} → ${a.output_lang}`;
+      $("langB").textContent = `Language: ${b.input_lang} → ${b.output_lang}`;
+
+      renderUtter($("abBox"), state.last_ab, state.avg_latency_ab);
+      renderUtter($("baBox"), state.last_ba, state.avg_latency_ba);
+
+      $("audioMeta").textContent =
+        `A → B: ${a.mic_active ? "● Active (mic)" : "○ Idle"} · ` +
+        `B → A: ${b.mic_active ? "● Active (mic)" : "○ Idle"} · ` +
+        `Avg A→B ${state.avg_latency_ab}s · Avg B→A ${state.avg_latency_ba}s`;
+
+      const log = (state.event_log || [])
+        .map((e) => `[${e.iso}] ${e.message}${e.latency_sec != null ? "  latency=" + e.latency_sec + "s" : ""}`)
+        .join("\n");
+      $("logBox").textContent = log || "(empty)";
+
+      if (a.connected && b.connected) {
+        setBanner("Both phones connected. Hold-to-speak on either phone to test the live pipeline.");
+      } else if (a.connected || b.connected) {
+        setBanner("One phone connected. Scan the other QR code.", true);
+      } else {
+        setBanner(`Scan QR codes on the same Wi-Fi. Server: ${host}/test/`, true);
+      }
+    }
+
+    async function loadLan() {
+      const res = await fetch("/test/api/lan");
+      const data = await res.json();
+      const sel = $("lanSelect");
+      sel.innerHTML = "";
+      const ips = data.ips || [];
+      const isVirtual = (ip) =>
+        ip.startsWith("192.168.56.") ||
+        ip.startsWith("192.168.59.") ||
+        ip.startsWith("192.168.99.") ||
+        /^172\.(1[7-9]|2\d|3[01])\./.test(ip);
+      if (!ips.length) {
+        const o = document.createElement("option");
+        o.value = location.hostname;
+        o.textContent = location.hostname + " (fallback)";
+        sel.appendChild(o);
+      } else {
+        for (const ip of ips) {
+          const o = document.createElement("option");
+          o.value = ip;
+          o.textContent = isVirtual(ip)
+            ? `${ip} ⚠ VirtualBox/Docker — phones cannot reach this`
+            : `${ip} ← use this on Wi‑Fi`;
+          if (ip === data.default) o.selected = true;
+          sel.appendChild(o);
+        }
+      }
+      // Prefer API default (real Wi‑Fi), never VirtualBox host-only.
+      if (data.default && ips.includes(data.default)) {
+        sel.value = data.default;
+      } else if (ips.includes(location.hostname) && !isVirtual(location.hostname)) {
+        sel.value = location.hostname;
+      }
+      selectedHost = phoneHost();
+      if (isVirtual(sel.value)) {
+        setBanner(
+          "Selected LAN IP looks like VirtualBox. Switch the dropdown to your Wi‑Fi IP (e.g. 10.x / 192.168.x from Wi‑Fi), then click New session.",
+          true
+        );
+      }
+    }
+
+    async function createSession() {
+      const host = phoneHost();
+      const res = await fetch("/test/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          // A speaks English → B hears Tanglish; B speaks Tanglish → A hears English
+          input_a: "en",
+          output_a: "tanglish",
+          input_b: "tanglish",
+          output_b: "en",
+          debug: true,
+          host,
+        }),
+      });
+      const state = await res.json();
+      connectWs(state.session_id);
+      renderState(state);
+    }
+
+    async function ensureSession() {
+      const host = phoneHost();
+      const res = await fetch(`/test/api/session/active?host=${encodeURIComponent(host)}`);
+      const data = await res.json();
+      if (data.session) {
+        connectWs(data.session.session_id);
+        // refresh URLs for selected host
+        const r2 = await fetch(`/test/api/session/${data.session.session_id}?host=${encodeURIComponent(host)}`);
+        renderState(await r2.json());
+      } else {
+        await createSession();
+      }
+    }
+
+    function connectWs(sessionId) {
+      if (ws) {
+        try { ws.close(); } catch (_) {}
+      }
+      const proto = location.protocol === "https:" ? "wss" : "ws";
+      ws = new WebSocket(`${proto}://${location.host}/test/ws/dashboard/${sessionId}`);
+      ws.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === "state") renderState(msg.state);
+      };
+      ws.onclose = () => {
+        setTimeout(() => {
+          if (session) connectWs(session.session_id);
+        }, 1500);
+      };
+    }
+
+    $("lanSelect").addEventListener("change", async () => {
+      if (!session) return;
+      const host = phoneHost();
+      const res = await fetch(`/test/api/session/${session.session_id}?host=${encodeURIComponent(host)}`);
+      renderState(await res.json());
+    });
+
+    $("btnNew").onclick = () => createSession();
+    $("btnEnd").onclick = async () => {
+      if (!session) return;
+      await fetch(`/test/api/session/${session.session_id}`, { method: "DELETE" });
+      session = null;
+      await createSession();
+    };
+    $("btnSim").onclick = async () => {
+      if (!session) return;
+      await fetch(`/test/api/session/${session.session_id}/simulate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          direction: "A→B",
+          text: "Unga driver 5 minutes la vandhuruvaanga. OTP 4821 share pannunga.",
+          skip_stt: true,
+        }),
+      });
+      await fetch(`/test/api/session/${session.session_id}/simulate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          direction: "B→A",
+          text: "Your driver will arrive in five minutes. Please share the OTP.",
+          skip_stt: true,
+        }),
+      });
+    };
+
+    (async () => {
+      if (new URLSearchParams(location.search).get("embed") === "1") {
+        document.body.classList.add("embed");
+      }
+      try {
+        await loadLan();
+        const stt = await (await fetch("/test/api/stt-status")).json();
+        if (!stt.ready) {
+          setBanner("STT not ready yet: " + (stt.error || "loading…") + " Text self-test still works.", true);
+        }
+        await ensureSession();
+      } catch (e) {
+        setBanner("Failed to start: " + e, true);
+      }
+    })();
+  </script>
+</body>
+</html>

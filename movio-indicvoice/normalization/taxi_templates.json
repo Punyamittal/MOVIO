@@ -1,0 +1,158 @@
+{
+  "_comment": "Taxi-domain TTS templates. Match against normalized spoken text. Prefer phrase-sized stitch units (not word-by-word) for natural prosody.",
+  "version": 1,
+  "templates": [
+    {
+      "id": "driver_arrived",
+      "pattern": "(?i)^Your driver has arrived\\.?$",
+      "slots": [],
+      "units": [{"type": "static", "text": "Your driver has arrived."}]
+    },
+    {
+      "id": "driver_on_the_way",
+      "pattern": "(?i)^Your driver is on the way\\.?$",
+      "slots": [],
+      "units": [{"type": "static", "text": "Your driver is on the way."}]
+    },
+    {
+      "id": "ride_arrive_shortly",
+      "pattern": "(?i)^Your ride will arrive shortly\\.?$",
+      "slots": [],
+      "units": [{"type": "static", "text": "Your ride will arrive shortly."}]
+    },
+    {
+      "id": "ride_arrived",
+      "pattern": "(?i)^Your ride has arrived\\.?$",
+      "slots": [],
+      "units": [{"type": "static", "text": "Your ride has arrived."}]
+    },
+    {
+      "id": "share_otp_bare",
+      "pattern": "(?i)^Please share the OTP\\.?$",
+      "slots": [],
+      "units": [{"type": "static", "text": "Please share the OTP."}]
+    },
+    {
+      "id": "proceed_pickup",
+      "pattern": "(?i)^Please proceed to the pickup point\\.?$",
+      "slots": [],
+      "units": [{"type": "static", "text": "Please proceed to the pickup point."}]
+    },
+    {
+      "id": "wait_main_entrance",
+      "pattern": "(?i)^Please wait near the main entrance\\.?$",
+      "slots": [],
+      "units": [{"type": "static", "text": "Please wait near the main entrance."}]
+    },
+    {
+      "id": "driver_arrive_minutes",
+      "pattern": "(?i)^Your driver will arrive in (?P<minutes>(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)(?:[\\s-]+(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred))*|[0-9]+) minutes\\.?$",
+      "slots": ["minutes"],
+      "units": [
+        {"type": "static", "text": "Your driver will arrive"},
+        {"type": "dynamic", "format": "in {minutes} minutes."}
+      ]
+    },
+    {
+      "id": "driver_minutes_away",
+      "pattern": "(?i)^Your driver is (?P<minutes>(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)(?:[\\s-]+(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred))*|[0-9]+) minutes away\\.?$",
+      "slots": ["minutes"],
+      "units": [
+        {"type": "static", "text": "Your driver is"},
+        {"type": "dynamic", "format": "{minutes} minutes away."}
+      ]
+    },
+    {
+      "id": "wait_for_minutes",
+      "pattern": "(?i)^Please wait for (?P<minutes>(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)(?:[\\s-]+(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred))*|[0-9]+) minutes\\.?$",
+      "slots": ["minutes"],
+      "units": [
+        {"type": "static", "text": "Please wait for"},
+        {"type": "dynamic", "format": "{minutes} minutes."}
+      ]
+    },
+    {
+      "id": "share_otp_value",
+      "pattern": "(?i)^Please share the OTP (?P<otp>(?:zero|one|two|three|four|five|six|seven|eight|nine)(?:\\s+(?:zero|one|two|three|four|five|six|seven|eight|nine))*|[0-9]{3,8})\\.?$",
+      "slots": ["otp"],
+      "units": [
+        {"type": "static", "text": "Please share the OTP"},
+        {"type": "dynamic", "format": "{otp}."}
+      ]
+    },
+    {
+      "id": "ride_arrived_at",
+      "pattern": "(?i)^Your ride has arrived at (?P<location>.+?)\\.?$",
+      "slots": ["location"],
+      "units": [
+        {"type": "static", "text": "Your ride has arrived at"},
+        {"type": "dynamic", "format": "{location}."}
+      ]
+    },
+    {
+      "id": "driver_waiting_at",
+      "pattern": "(?i)^The driver is waiting at (?P<location>.+?)\\.?$",
+      "slots": ["location"],
+      "units": [
+        {"type": "static", "text": "The driver is waiting at"},
+        {"type": "dynamic", "format": "{location}."}
+      ]
+    },
+    {
+      "id": "driver_waiting_near",
+      "pattern": "(?i)^Your driver is waiting near (?P<location>.+?)\\.?$",
+      "slots": ["location"],
+      "units": [
+        {"type": "static", "text": "Your driver is waiting near"},
+        {"type": "dynamic", "format": "{location}."}
+      ]
+    },
+    {
+      "id": "ask_driver_wait_minutes",
+      "pattern": "(?i)^Please ask the driver to wait for (?P<minutes>(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)(?:[\\s-]+(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred))*|[0-9]+) minutes\\.?$",
+      "slots": ["minutes"],
+      "units": [
+        {"type": "static", "text": "Please ask the driver to wait for"},
+        {"type": "dynamic", "format": "{minutes} minutes."}
+      ]
+    },
+    {
+      "id": "driver_reach_place_minutes",
+      "pattern": "(?i)^The driver will reach (?P<location>.+?) in (?P<minutes>(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)(?:[\\s-]+(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred))*|[0-9]+) minutes\\.?$",
+      "slots": ["location", "minutes"],
+      "units": [
+        {"type": "static", "text": "The driver will reach"},
+        {"type": "dynamic", "format": "{location} in {minutes} minutes."}
+      ]
+    },
+    {
+      "id": "the_driver_waiting_near",
+      "pattern": "(?i)^The driver is waiting near (?P<location>.+?)\\.?$",
+      "slots": ["location"],
+      "units": [
+        {"type": "static", "text": "The driver is waiting near"},
+        {"type": "dynamic", "format": "{location}."}
+      ]
+    },
+    {
+      "id": "otp_is_value",
+      "pattern": "(?i)^The OTP is (?P<otp>(?:zero|one|two|three|four|five|six|seven|eight|nine)(?:\\s+(?:zero|one|two|three|four|five|six|seven|eight|nine))*|[0-9]{3,8})\\.?$",
+      "slots": ["otp"],
+      "units": [
+        {"type": "static", "text": "The OTP is"},
+        {"type": "dynamic", "format": "{otp}."}
+      ]
+    },
+    {
+      "id": "arrive_ready_at",
+      "pattern": "(?i)^Your driver will arrive in (?P<minutes>(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)(?:[\\s-]+(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred))*|[0-9]+) minutes,? so please be ready (?P<place>(?:at|near) .+?)\\.?$",
+      "slots": ["minutes", "place"],
+      "units": [
+        {"type": "static", "text": "Your driver will arrive"},
+        {"type": "dynamic", "format": "in {minutes} minutes,"},
+        {"type": "static", "text": "so please be ready"},
+        {"type": "dynamic", "format": "{place}."}
+      ]
+    }
+  ]
+}

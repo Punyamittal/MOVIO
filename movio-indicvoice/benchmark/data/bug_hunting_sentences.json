@@ -1,0 +1,710 @@
+[
+  {
+    "text": "I am waiting near the main entrance, so please tell the driver to come there instead of going to the parking area.",
+    "category": "conversational",
+    "stress": [
+      "conjunctions",
+      "locations"
+    ]
+  },
+  {
+    "text": "I will reach the location in about ten minutes, but if the traffic gets worse, I might be a little late.",
+    "category": "conversational",
+    "stress": [
+      "conditionals",
+      "numbers",
+      "traffic"
+    ]
+  },
+  {
+    "text": "Can you please call me once you reach the pickup point because I cannot see the vehicle from where I am standing?",
+    "category": "conversational",
+    "stress": [
+      "questions",
+      "pickup"
+    ]
+  },
+  {
+    "text": "I think the driver has taken the wrong turn because the location on my phone shows that he is moving away from me.",
+    "category": "conversational",
+    "stress": [
+      "reasoning",
+      "navigation"
+    ]
+  },
+  {
+    "text": "Please wait for two minutes while I collect my luggage and come downstairs.",
+    "category": "conversational",
+    "stress": [
+      "commands",
+      "numbers"
+    ]
+  },
+  {
+    "text": "I have already reached the destination, but I am not sure which entrance I am supposed to use.",
+    "category": "conversational",
+    "stress": [
+      "destination",
+      "uncertainty"
+    ]
+  },
+  {
+    "text": "If you are unable to find the address, I can send you my live location.",
+    "category": "conversational",
+    "stress": [
+      "conditionals",
+      "location_share"
+    ]
+  },
+  {
+    "text": "The driver told me that he would arrive in five minutes, but I have been waiting here for almost fifteen minutes.",
+    "category": "conversational",
+    "stress": [
+      "mixed_tenses",
+      "numbers",
+      "repetition"
+    ]
+  },
+  {
+    "text": "I am currently standing outside the building near the security gate, wearing a blue shirt and carrying a black backpack, so please ask the driver to look for me there.",
+    "category": "long",
+    "stress": [
+      "long_utterance",
+      "description",
+      "commands"
+    ]
+  },
+  {
+    "text": "I ordered the ride about twenty minutes ago, and although the application says that the driver has arrived, I cannot see the vehicle anywhere around the pickup location.",
+    "category": "long",
+    "stress": [
+      "long_utterance",
+      "contrast",
+      "numbers"
+    ]
+  },
+  {
+    "text": "If the driver cannot enter the apartment complex because the security guard does not allow outside vehicles inside, please ask him to wait near the main gate and I will walk there.",
+    "category": "long",
+    "stress": [
+      "long_utterance",
+      "conditionals",
+      "commands"
+    ]
+  },
+  {
+    "text": "I need to reach the railway station before six thirty because my train leaves at seven fifteen, and I still have to collect my luggage and find the correct platform.",
+    "category": "long",
+    "stress": [
+      "long_utterance",
+      "times",
+      "urgency"
+    ]
+  },
+  {
+    "text": "I accidentally entered the wrong destination while booking the ride, so please ask the driver whether he can take me to the new location instead.",
+    "category": "long",
+    "stress": [
+      "long_utterance",
+      "destination_change"
+    ]
+  },
+  {
+    "text": "The OTP is 4821, so please enter 4821 when the driver asks for verification.",
+    "category": "numbers_otp",
+    "stress": [
+      "otp",
+      "repetition"
+    ]
+  },
+  {
+    "text": "My booking number is 739284, and the last four digits of my phone number are 5617.",
+    "category": "numbers_otp",
+    "stress": [
+      "booking_id",
+      "phone_digits"
+    ]
+  },
+  {
+    "text": "The driver said he would arrive in 5 minutes, but the application is showing 12 minutes.",
+    "category": "numbers_otp",
+    "stress": [
+      "eta",
+      "contrast"
+    ]
+  },
+  {
+    "text": "I have three bags, two suitcases, and one laptop bag with me.",
+    "category": "numbers_otp",
+    "stress": [
+      "cardinals",
+      "enumeration"
+    ]
+  },
+  {
+    "text": "The total amount shown on my screen is 847 rupees and 50 paise.",
+    "category": "numbers_otp",
+    "stress": [
+      "currency"
+    ]
+  },
+  {
+    "text": "My train number is 12642 and my seat number is 38.",
+    "category": "numbers_otp",
+    "stress": [
+      "train_number",
+      "seat"
+    ]
+  },
+  {
+    "text": "Please tell the driver that the apartment number is 12B, not 12D.",
+    "category": "numbers_otp",
+    "stress": [
+      "apartment",
+      "contrast"
+    ]
+  },
+  {
+    "text": "The pickup time is 8:45 AM and the estimated arrival time is 9:20 AM.",
+    "category": "numbers_otp",
+    "stress": [
+      "times"
+    ]
+  },
+  {
+    "text": "Please tell Ravi that I am waiting near the second entrance.",
+    "category": "names_places",
+    "stress": [
+      "person_name",
+      "entrance"
+    ]
+  },
+  {
+    "text": "My destination is Chennai Central Railway Station, not Chennai Egmore Railway Station.",
+    "category": "names_places",
+    "stress": [
+      "places",
+      "contrast"
+    ]
+  },
+  {
+    "text": "I am currently near Guindy Metro Station and I need to go to Velachery.",
+    "category": "names_places",
+    "stress": [
+      "places",
+      "lexicon"
+    ]
+  },
+  {
+    "text": "Please ask Priya to wait near the reception desk.",
+    "category": "names_places",
+    "stress": [
+      "person_name",
+      "commands"
+    ]
+  },
+  {
+    "text": "The address is 24, Anna Salai, Teynampet, Chennai.",
+    "category": "names_places",
+    "stress": [
+      "address",
+      "punctuation"
+    ]
+  },
+  {
+    "text": "I need to go from Tambaram to Sholinganallur through OMR.",
+    "category": "names_places",
+    "stress": [
+      "places",
+      "route"
+    ]
+  },
+  {
+    "text": "Please tell the driver to take the route through Medavakkam instead of going through Pallikaranai.",
+    "category": "names_places",
+    "stress": [
+      "places",
+      "route"
+    ]
+  },
+  {
+    "text": "Where exactly are you waiting right now?",
+    "category": "questions",
+    "stress": [
+      "questions"
+    ]
+  },
+  {
+    "text": "Did the driver call you after reaching the pickup location?",
+    "category": "questions",
+    "stress": [
+      "questions",
+      "pickup"
+    ]
+  },
+  {
+    "text": "Can you see the vehicle from where you are standing?",
+    "category": "questions",
+    "stress": [
+      "questions"
+    ]
+  },
+  {
+    "text": "How long will it take to reach the railway station?",
+    "category": "questions",
+    "stress": [
+      "questions",
+      "eta"
+    ]
+  },
+  {
+    "text": "Which entrance should I use to enter the building?",
+    "category": "questions",
+    "stress": [
+      "questions"
+    ]
+  },
+  {
+    "text": "Did you already share the OTP with the driver?",
+    "category": "questions",
+    "stress": [
+      "questions",
+      "otp"
+    ]
+  },
+  {
+    "text": "Are you coming from the main road or from the service road?",
+    "category": "questions",
+    "stress": [
+      "questions",
+      "alternatives"
+    ]
+  },
+  {
+    "text": "Why did the driver cancel the ride?",
+    "category": "questions",
+    "stress": [
+      "questions",
+      "cancellation"
+    ]
+  },
+  {
+    "text": "Can you please tell me whether the destination has changed?",
+    "category": "questions",
+    "stress": [
+      "questions",
+      "destination_change"
+    ]
+  },
+  {
+    "text": "I need to go there, not here.",
+    "category": "confusable",
+    "stress": [
+      "stt_confusable",
+      "contrast"
+    ]
+  },
+  {
+    "text": "Please wait there until I come.",
+    "category": "confusable",
+    "stress": [
+      "stt_confusable"
+    ]
+  },
+  {
+    "text": "I said fifteen, not fifty.",
+    "category": "confusable",
+    "stress": [
+      "stt_confusable",
+      "numbers"
+    ]
+  },
+  {
+    "text": "The car is on the right, not on the left.",
+    "category": "confusable",
+    "stress": [
+      "stt_confusable",
+      "contrast"
+    ]
+  },
+  {
+    "text": "I need room number fourteen, not forty.",
+    "category": "confusable",
+    "stress": [
+      "stt_confusable",
+      "numbers"
+    ]
+  },
+  {
+    "text": "Please take the first right after the signal.",
+    "category": "confusable",
+    "stress": [
+      "stt_confusable",
+      "navigation"
+    ]
+  },
+  {
+    "text": "The driver is waiting behind the blue car.",
+    "category": "confusable",
+    "stress": [
+      "stt_confusable"
+    ]
+  },
+  {
+    "text": "I want to go to the station, not the bus stand.",
+    "category": "confusable",
+    "stress": [
+      "stt_confusable",
+      "contrast"
+    ]
+  },
+  {
+    "text": "Yeah, I'm almost there, just give me two minutes.",
+    "category": "spoken",
+    "stress": [
+      "informal",
+      "numbers"
+    ]
+  },
+  {
+    "text": "No, no, that's not the right location, I'm actually standing on the other side.",
+    "category": "spoken",
+    "stress": [
+      "informal",
+      "repetition"
+    ]
+  },
+  {
+    "text": "Wait a second, I think I can see the car now.",
+    "category": "spoken",
+    "stress": [
+      "informal"
+    ]
+  },
+  {
+    "text": "Sorry, I didn't hear you properly, could you say that again?",
+    "category": "spoken",
+    "stress": [
+      "informal",
+      "questions"
+    ]
+  },
+  {
+    "text": "Yeah, that's fine, just ask the driver to wait for me.",
+    "category": "spoken",
+    "stress": [
+      "informal",
+      "commands"
+    ]
+  },
+  {
+    "text": "I'm not really sure where I am, so I'll send you my location.",
+    "category": "spoken",
+    "stress": [
+      "informal",
+      "location_share"
+    ]
+  },
+  {
+    "text": "Hold on, let me check the address once.",
+    "category": "spoken",
+    "stress": [
+      "informal"
+    ]
+  },
+  {
+    "text": "I think we're going in the wrong direction.",
+    "category": "spoken",
+    "stress": [
+      "informal",
+      "navigation"
+    ]
+  },
+  {
+    "text": "Actually, can we change the destination?",
+    "category": "spoken",
+    "stress": [
+      "informal",
+      "questions"
+    ]
+  },
+  {
+    "text": "Okay, got it, I'll meet you near the entrance.",
+    "category": "spoken",
+    "stress": [
+      "informal"
+    ]
+  },
+  {
+    "text": "I was supposed to meet the driver at the main gate, but he seems to be waiting near the back entrance.",
+    "category": "translation_stress",
+    "stress": [
+      "mixed_tenses",
+      "contrast",
+      "locations"
+    ]
+  },
+  {
+    "text": "Although the application says that the ride has started, I am still standing at the pickup location.",
+    "category": "translation_stress",
+    "stress": [
+      "contrast",
+      "aspect"
+    ]
+  },
+  {
+    "text": "If you have already crossed the signal, please take the next U-turn and come back toward the entrance.",
+    "category": "translation_stress",
+    "stress": [
+      "conditionals",
+      "navigation",
+      "commands"
+    ]
+  },
+  {
+    "text": "I told the driver that I needed to go to the airport, but he seems to have entered the railway station as the destination.",
+    "category": "translation_stress",
+    "stress": [
+      "mixed_tenses",
+      "destination"
+    ]
+  },
+  {
+    "text": "Since I have a lot of luggage with me, please make sure that the vehicle has enough space before we start the trip.",
+    "category": "translation_stress",
+    "stress": [
+      "reason",
+      "commands"
+    ]
+  },
+  {
+    "text": "I understand what you are saying, but I am asking about the pickup location, not the destination.",
+    "category": "translation_stress",
+    "stress": [
+      "contrast",
+      "clarification"
+    ]
+  },
+  {
+    "text": "If the driver reaches before me, please ask him to wait for a few minutes instead of cancelling the ride.",
+    "category": "translation_stress",
+    "stress": [
+      "conditionals",
+      "commands"
+    ]
+  },
+  {
+    "text": "I was looking for the vehicle near the entrance, but apparently it was parked on the opposite side of the road.",
+    "category": "translation_stress",
+    "stress": [
+      "mixed_tenses",
+      "locations"
+    ]
+  },
+  {
+    "text": "I am standing outside the main entrance of the building near the security gate, and the driver told me that he would arrive in about five minutes, so please ask him to wait there because I have two suitcases, one laptop bag, and an important document with me, and I do not want to walk all the way to the parking area.",
+    "category": "bug_hunting_e2e",
+    "stress": [
+      "long_audio",
+      "pauses",
+      "numbers",
+      "conjunctions",
+      "context",
+      "translation",
+      "tts_naturalness"
+    ]
+  },
+  {
+    "text": "உங்க driver முன்வாசல் அருகில் காத்திட்டு இருக்காரு.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "Driver பிக்அப் இடத்துக்கு வந்துட்டாரு.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "நான் கட்டிடத்துக்கு வெளியில நிற்கிறேன் — driver-ஐ கிட்ட வரச் சொல்லுங்கள்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "Driver எதிர்ப்பக்கம் பார்க் பண்ணிருக்காரு, எனக்கு வாகனம் கண்டுபிடிக்க முடியல.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "தயவுசெய்து driver-க்கு சொல்லுங்கள், நான் நீல சர்ட் போட்டு security cabin அருகில் இருக்கேன்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "Driver தவறான நுழைவாயிலுக்கு போயிட்டாரு போல — முதன்மை கேட்-க்கு வரச் சொல்லுங்கள்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "Cab TN09AB4821 கேட்ல காத்திட்டு இருக்கு.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "உங்க driver ஐந்து நிமிடத்துல வந்துருவாங்க.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "Driver ஏழு நிமிடம் தாமதம் ஆகும் — போக்குவரத்து ரொம்ப நெரிசலா இருக்கு.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "தயவுசெய்து driver-ஐ hazard light போட்டு நிற்கச் சொல்லுங்கள்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "OTP 4821-ஐ driver-கிட்ட மட்டும் பகிருங்கள்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "OTP 7394 enter பண்ணுங்கள், trip தொடங்கணும்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "உங்கள் டிரைவர் முன் வாசலில் காத்திருக்கிறார்.",
+    "category": "tamil_script",
+    "language_mix": "ta",
+    "stress": [
+      "tamil_script"
+    ]
+  },
+  {
+    "text": "OTP 4821 ஐ டிரைவரிடம் மட்டும் பகிருங்கள்.",
+    "category": "tamil_script",
+    "language_mix": "ta",
+    "stress": [
+      "tamil_script"
+    ]
+  },
+  {
+    "text": "நான் கிண்டி மெட்ரோ அருகில் காத்திருக்கிறேன்.",
+    "category": "tamil_script",
+    "language_mix": "ta",
+    "stress": [
+      "tamil_script"
+    ]
+  },
+  {
+    "text": "வேளச்சேரிக்கு போக வேண்டும், OMR வழியாக.",
+    "category": "tamil_script",
+    "language_mix": "ta",
+    "stress": [
+      "tamil_script"
+    ]
+  },
+  {
+    "text": "டிரைவர் ஐந்து நிமிடத்தில் வருவார்.",
+    "category": "tamil_script",
+    "language_mix": "ta",
+    "stress": [
+      "tamil_script"
+    ]
+  },
+  {
+    "text": "போரூர் toll plaza-ல வாடிக்கையாளர் காத்திட்டு இருக்காங்க.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "நான் இப்போ இரண்டு பெரிய suitcase-ஓட நிற்கிறேன், driver-ஐ கிட்ட வரச் சொல்லுங்கள்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "Driver சொன்னாரு ஐந்து நிமிடத்துல வருவேன்னு, ஆனா நான் பதினைஞ்சு நிமிடமா காத்திருக்கேன்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "தவறான இடம் book ஆயிடுச்சு — cancel பண்ணி வேளச்சேரிக்கு மறுபடி book பண்ணுங்கள்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "நான் அண்ணா நகர்ல இருக்கேன், driver எழும்பூர் பக்கம் போயிட்டாரு போல.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  }
+]

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Voice Translation Phone</title>
+  <style>
+    :root {
+      --bg: #101820;
+      --ink: #f2f5f8;
+      --mute: #9aabbc;
+      --ok: #3dd68c;
+      --bad: #f07178;
+      --warn: #e6b450;
+      --line: #2a3542;
+      --accent: #39bae6;
+      --hold: #e6b450;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: linear-gradient(165deg, #15202b, #0d1218 60%);
+      color: var(--ink);
+      padding: 1rem 1rem 2rem;
+    }
+    .wrap { max-width: 26rem; margin: 0 auto; }
+    h1 {
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      margin: 0.25rem 0 0.15rem;
+    }
+    .role {
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin: 0.5rem 0 1rem;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      background: rgba(255,255,255,0.03);
+      margin-bottom: 0.75rem;
+    }
+    .row { display: flex; justify-content: space-between; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.92rem; }
+    .label { color: var(--mute); }
+    .dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; display: inline-block; background: var(--bad); margin-right: 0.35rem; }
+    .dot.on { background: var(--ok); }
+    .dot.warn { background: var(--warn); }
+    select {
+      width: 100%;
+      margin-top: 0.25rem;
+      padding: 0.55rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #0c1218;
+      color: var(--ink);
+      font: inherit;
+    }
+    .hold {
+      width: 100%;
+      margin-top: 0.75rem;
+      border: 0;
+      border-radius: 999px;
+      padding: 1.15rem 1rem;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      background: var(--hold);
+      color: #1a1408;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .hold:disabled { opacity: 0.45; }
+    .hold.active { background: var(--bad); color: #fff; }
+    .msg {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--mute);
+      white-space: pre-wrap;
+    }
+    .msg.err { color: var(--bad); }
+    .lat { font-size: 0.8rem; color: var(--mute); margin-top: 0.5rem; }
+    button.secondary {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.65rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Voice Translation</h1>
+    <div class="role" id="roleLabel">PHONE —</div>
+
+    <div class="card">
+      <div class="row"><span class="label">Status</span><span id="status"><span class="dot"></span>Connecting…</span></div>
+      <div class="row"><span class="label">Partner</span><span id="partner">—</span></div>
+      <div class="row"><span class="label">Microphone</span><span id="mic"><span class="dot"></span>Idle</span></div>
+      <div class="row"><span class="label">Translated audio</span><span id="recv"><span class="dot"></span>Waiting</span></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Input language (you speak)</div>
+      <select id="inLang">
+        <option value="en">English (en)</option>
+        <option value="tanglish">Tanglish</option>
+        <option value="ta">Tamil (ta)</option>
+        <option value="auto">Auto-detect</option>
+      </select>
+      <div class="label" style="margin-top:0.65rem">Output language (partner hears)</div>
+      <select id="outLang">
+        <option value="tanglish">Tanglish</option>
+        <option value="ta">Tamil (ta)</option>
+        <option value="en">English (en)</option>
+      </select>
+    </div>
+
+    <button type="button" class="hold" id="holdBtn" disabled>HOLD TO SPEAK</button>
+    <button type="button" class="secondary" id="unlockBtn">Tap to enable microphone / audio</button>
+    <button type="button" class="secondary" id="playRecvBtn" style="display:none">Tap to play received audio</button>
+    <audio id="recvAudio" playsinline webkit-playsinline></audio>
+
+    <div class="msg" id="msg">Connecting to laptop server…</div>
+    <div class="lat" id="lat"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const parts = location.pathname.split("/").filter(Boolean);
+    // /test/SESSION/A
+    const sessionId = parts[1];
+    const role = (parts[2] || "").toUpperCase();
+    const token = params.get("token") || "";
+
+    const $ = (id) => document.getElementById(id);
+    $("roleLabel").textContent = "PHONE " + role;
+
+    // Role presets (must match dashboard session create). Do NOT send these
+    // before hello — that used to overwrite server langs with wrong defaults.
+    if (role === "A") {
+      $("inLang").value = "en";
+      $("outLang").value = "tanglish";
+    } else if (role === "B") {
+      $("inLang").value = "tanglish";
+      $("outLang").value = "en";
+    }
+
+    let ws = null;
+    let connected = false;
+    let mediaStream = null;
+    let audioCtx = null;
+    let processor = null;
+    let sourceNode = null;
+    let recording = false;
+    let pcmChunks = [];
+    let sampleRate = 16000;
+    let latencies = [];
+    let playQueue = Promise.resolve();
+    let audioUnlocked = false;
+    let pendingRecv = null; // { url, mime, text }
+
+    function setStatus(text, cls) {
+      const dotCls = cls === "on" ? "on" : cls === "warn" ? "warn" : "";
+      $("status").innerHTML = `<span class="dot ${dotCls}"></span>${text}`;
+    }
+    function setMic(active) {
+      $("mic").innerHTML = `<span class="dot ${active ? "on" : ""}"></span>${active ? "Active" : "Idle"}`;
+    }
+    function setRecv(active) {
+      $("recv").innerHTML = `<span class="dot ${active ? "on" : ""}"></span>${active ? "Receiving" : "Waiting"}`;
+    }
+    function message(text, err) {
+      $("msg").textContent = text;
+      $("msg").className = "msg" + (err ? " err" : "");
+    }
+
+    function b64ToUint8(b64) {
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    }
+
+    function sniffMime(bytes, fmt) {
+      const f = (fmt || "").toLowerCase();
+      if (f === "mp3" || f === "mpeg" || f === "audio/mpeg") return "audio/mpeg";
+      if (f === "wav" || f === "wave" || f === "audio/wav") return "audio/wav";
+      // Magic bytes
+      if (bytes.length >= 3 && bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0) return "audio/mpeg";
+      if (bytes.length >= 3 && bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) return "audio/mpeg";
+      if (bytes.length >= 4 && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46) return "audio/wav";
+      return "audio/mpeg"; // edge_fast default
+    }
+
+    async function unlockAudio() {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") {
+        try { await audioCtx.resume(); } catch (_) {}
+      }
+      try {
+        const buf = audioCtx.createBuffer(1, 1, audioCtx.sampleRate || 22050);
+        const src = audioCtx.createBufferSource();
+        src.buffer = buf;
+        src.connect(audioCtx.destination);
+        src.start(0);
+      } catch (_) {}
+      // Also prime HTMLAudioElement (needed on iOS/Chrome autoplay policy)
+      try {
+        const a = $("recvAudio");
+        a.muted = true;
+        a.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=";
+        await a.play().catch(() => {});
+        a.pause();
+        a.muted = false;
+        a.removeAttribute("src");
+        a.load();
+      } catch (_) {}
+      audioUnlocked = true;
+    }
+
+    function playViaElement(url) {
+      return new Promise((resolve, reject) => {
+        const audio = $("recvAudio");
+        const done = (ok, err) => {
+          audio.onended = null;
+          audio.onerror = null;
+          if (ok) resolve();
+          else reject(err || new Error("audio element failed"));
+        };
+        audio.onended = () => done(true);
+        audio.onerror = () => done(false, new Error("audio element error"));
+        audio.playsInline = true;
+        audio.setAttribute("playsinline", "true");
+        audio.setAttribute("webkit-playsinline", "true");
+        audio.preload = "auto";
+        audio.src = url;
+        audio.load();
+        const p = audio.play();
+        if (p && typeof p.then === "function") {
+          p.then(() => { /* playing */ }).catch((err) => done(false, err));
+        }
+      });
+    }
+
+    function playViaWebAudio(bytes) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === "suspended") await audioCtx.resume();
+          const copy = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+          const decoded = await audioCtx.decodeAudioData(copy);
+          const src = audioCtx.createBufferSource();
+          src.buffer = decoded;
+          src.connect(audioCtx.destination);
+          src.onended = () => resolve();
+          src.start(0);
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+
+    function showPlayFallback(url, mime, text) {
+      if (pendingRecv && pendingRecv.url) {
+        try { URL.revokeObjectURL(pendingRecv.url); } catch (_) {}
+      }
+      pendingRecv = { url, mime, text };
+      $("playRecvBtn").style.display = "block";
+      message(
+        (text ? text + "\n\n" : "") +
+        "Audio is ready but the phone blocked autoplay.\nTap “Tap to play received audio”.",
+        true
+      );
+    }
+
+    function playBase64Audio(b64, fmt, text) {
+      if (!b64) {
+        message((text || "Partner speech") + "\n\n(No audio bytes received)", true);
+        return;
+      }
+      const bytes = b64ToUint8(b64);
+      if (!bytes.length) {
+        message((text || "Partner speech") + "\n\n(Empty audio)", true);
+        return;
+      }
+      const mime = sniffMime(bytes, fmt);
+      const blob = new Blob([bytes], { type: mime });
+      const url = URL.createObjectURL(blob);
+      setRecv(true);
+      playQueue = playQueue.then(async () => {
+        try {
+          await unlockAudio();
+          try {
+            await playViaElement(url);
+          } catch (elErr) {
+            // Fallback: Web Audio API decode (works for mp3/wav on most phones)
+            await playViaWebAudio(bytes);
+          }
+          $("playRecvBtn").style.display = "none";
+          if (pendingRecv && pendingRecv.url === url) pendingRecv = null;
+          else URL.revokeObjectURL(url);
+          setRecv(false);
+        } catch (err) {
+          setRecv(false);
+          showPlayFallback(url, mime, text || "Partner speech");
+        }
+      });
+    }
+
+    function wsUrl() {
+      const proto = location.protocol === "https:" ? "wss" : "ws";
+      return `${proto}://${location.host}/test/ws/phone/${sessionId}/${role}?token=${encodeURIComponent(token)}`;
+    }
+
+    async function ensureMic() {
+      if (mediaStream) return mediaStream;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("This browser does not support microphone access.");
+      }
+      mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          channelCount: 1,
+        },
+        video: false,
+      });
+      return mediaStream;
+    }
+
+    function downsampleTo16k(float32, inRate) {
+      if (inRate === 16000) return float32;
+      const ratio = inRate / 16000;
+      const outLen = Math.floor(float32.length / ratio);
+      const out = new Float32Array(outLen);
+      for (let i = 0; i < outLen; i++) {
+        out[i] = float32[Math.floor(i * ratio)];
+      }
+      return out;
+    }
+
+    function floatTo16BitPCM(float32) {
+      const buf = new ArrayBuffer(float32.length * 2);
+      const view = new DataView(buf);
+      for (let i = 0; i < float32.length; i++) {
+        let s = Math.max(-1, Math.min(1, float32[i]));
+        view.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+      }
+      return new Uint8Array(buf);
+    }
+
+    function encodeWav(pcm16, rate) {
+      const buffer = new ArrayBuffer(44 + pcm16.length);
+      const view = new DataView(buffer);
+      const writeStr = (off, str) => {
+        for (let i = 0; i < str.length; i++) view.setUint8(off + i, str.charCodeAt(i));
+      };
+      writeStr(0, "RIFF");
+      view.setUint32(4, 36 + pcm16.length, true);
+      writeStr(8, "WAVE");
+      writeStr(12, "fmt ");
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, rate, true);
+      view.setUint32(28, rate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeStr(36, "data");
+      view.setUint32(40, pcm16.length, true);
+      new Uint8Array(buffer, 44).set(pcm16);
+      return buffer;
+    }
+
+    function b64FromArrayBuffer(buf) {
+      const bytes = new Uint8Array(buf);
+      let binary = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+      }
+      return btoa(binary);
+    }
+
+    async function startHold() {
+      if (recording || !connected) return;
+      try {
+        await ensureMic();
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") await audioCtx.resume();
+        sampleRate = audioCtx.sampleRate;
+        sourceNode = audioCtx.createMediaStreamSource(mediaStream);
+        processor = audioCtx.createScriptProcessor(4096, 1, 1);
+        const mute = audioCtx.createGain();
+        mute.gain.value = 0;
+        pcmChunks = [];
+        processor.onaudioprocess = (e) => {
+          if (!recording) return;
+          const input = e.inputBuffer.getChannelData(0);
+          pcmChunks.push(new Float32Array(input));
+        };
+        sourceNode.connect(processor);
+        processor.connect(mute);
+        mute.connect(audioCtx.destination);
+        recording = true;
+        $("holdBtn").classList.add("active");
+        $("holdBtn").textContent = "RECORDING… RELEASE TO SEND";
+        setMic(true);
+        ws && ws.send(JSON.stringify({ type: "mic", active: true }));
+        message("Listening… release to translate.");
+      } catch (err) {
+        console.error(err);
+        message(
+          "Microphone permission is required.\n\nPlease allow microphone access\nand reload this page.\n\n" +
+            (err && err.message ? err.message : ""),
+          true
+        );
+        if (location.protocol === "http:" && location.hostname !== "localhost") {
+          message(
+            "Microphone permission is required.\n\nOn Chrome, LAN HTTP often blocks the mic.\n" +
+              "Options:\n1) Use Firefox, or\n2) Restart server with HTTPS:\n   python -m phone_test --https\n" +
+              "3) chrome://flags → Insecure origins treated as secure\n   add this page origin.\n\n" +
+              (err && err.message ? err.message : ""),
+            true
+          );
+        }
+      }
+    }
+
+    function stopHold() {
+      if (!recording) return;
+      recording = false;
+      $("holdBtn").classList.remove("active");
+      $("holdBtn").textContent = "HOLD TO SPEAK";
+      setMic(false);
+      try {
+        processor && processor.disconnect();
+        sourceNode && sourceNode.disconnect();
+      } catch (_) {}
+      processor = null;
+      sourceNode = null;
+      ws && ws.send(JSON.stringify({ type: "mic", active: false }));
+
+      if (!pcmChunks.length) {
+        message("No audio captured.", true);
+        return;
+      }
+      let total = 0;
+      for (const c of pcmChunks) total += c.length;
+      const merged = new Float32Array(total);
+      let off = 0;
+      for (const c of pcmChunks) {
+        merged.set(c, off);
+        off += c.length;
+      }
+      const down = downsampleTo16k(merged, sampleRate);
+      const pcm16 = floatTo16BitPCM(down);
+      const wav = encodeWav(pcm16, 16000);
+      const audio_b64 = b64FromArrayBuffer(wav);
+      message("Sending audio to laptop…");
+      ensureCrossLang();
+      // Re-assert langs on every utterance so dropdown changes always apply
+      if (ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({
+          type: "lang",
+          input_lang: $("inLang").value,
+          output_lang: $("outLang").value,
+        }));
+        ws.send(JSON.stringify({
+          type: "audio_utterance",
+          mime: "audio/wav",
+          sample_rate: 16000,
+          audio_b64,
+          input_lang: $("inLang").value,
+          output_lang: $("outLang").value,
+        }));
+      }
+    }
+
+    function connect() {
+      setStatus("Connecting…", "warn");
+      ws = new WebSocket(wsUrl());
+      ws.onopen = () => {
+        connected = true;
+        setStatus("Connected", "on");
+        $("holdBtn").disabled = false;
+        message("Connected. Hold the button to speak.");
+      };
+      ws.onclose = () => {
+        connected = false;
+        setStatus("Reconnecting…", "warn");
+        $("holdBtn").disabled = true;
+        message("Disconnected from server. Reconnecting…", true);
+        setTimeout(connect, 1500);
+      };
+      ws.onerror = () => message("WebSocket error", true);
+      ws.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === "hello") {
+          $("partner").textContent = "PHONE " + msg.partner + (msg.partner_connected ? " (online)" : " (offline)");
+          if (msg.input_lang) $("inLang").value = msg.input_lang;
+          if (msg.output_lang) $("outLang").value = msg.output_lang;
+          ensureCrossLang();
+          sendLang();
+          message(
+            "Connected. You speak " + $("inLang").value +
+            "; partner hears " + $("outLang").value + ".\nHold the button to speak."
+          );
+          if (msg.stt && !msg.stt.ready) {
+            message("STT loading on laptop: " + (msg.stt.error || "please wait"), true);
+          }
+        }
+        if (msg.type === "lang") {
+          if (msg.input_lang) $("inLang").value = msg.input_lang;
+          if (msg.output_lang) $("outLang").value = msg.output_lang;
+          message(
+            "Languages updated. You speak " + $("inLang").value +
+            "; partner hears " + $("outLang").value + "."
+          );
+        }
+        if (msg.type === "status") {
+          if (msg.phase === "processing") message("Processing on laptop…");
+          if (msg.phase === "partner_speaking") setRecv(true);
+          if (msg.phase === "idle") { /* keep */ }
+        }
+        if (msg.type === "tts_audio") {
+          playBase64Audio(msg.audio_b64, msg.audio_format || "wav");
+          message("Partner speech:\n" + (msg.translated_text || msg.normalized_text || ""));
+        }
+        if (msg.type === "utterance_result") {
+          if (msg.ok) {
+            latencies.push(msg.latency_sec);
+            const avg = latencies.reduce((a, b) => a + b, 0) / latencies.length;
+            $("lat").textContent =
+              `Last translation latency: ${msg.latency_sec.toFixed(2)}s\n` +
+              `Average latency: ${avg.toFixed(2)}s\n` +
+              `STT ${msg.stt_ms}ms · Translate+TTS ${msg.pipeline_ms}ms`;
+            message(
+              "You said:\n" + msg.source_text +
+              "\n\nPartner heard (" + (msg.target_lang || $("outLang").value) + "):\n" +
+              msg.translated_text
+            );
+          } else {
+            message("Failed: " + (msg.error || "unknown"), true);
+          }
+        }
+        if (msg.type === "replaced") {
+          message(msg.detail || "Connection replaced", true);
+        }
+        if (msg.type === "session_ended") {
+          message("Session ended on laptop.", true);
+          setStatus("Disconnected", "");
+        }
+        if (msg.type === "error") message(msg.detail || "error", true);
+      };
+    }
+
+    function sendLang() {
+      if (!ws || ws.readyState !== 1) return;
+      ensureCrossLang();
+      ws.send(JSON.stringify({
+        type: "lang",
+        input_lang: $("inLang").value,
+        output_lang: $("outLang").value,
+      }));
+      message(
+        "You speak " + $("inLang").value +
+        "; partner hears " + $("outLang").value + "."
+      );
+    }
+
+    /** Never leave both sides on the same language (that causes English passthrough). */
+    function ensureCrossLang() {
+      const inn = ($("inLang").value || "").toLowerCase();
+      const out = ($("outLang").value || "").toLowerCase();
+      const inEn = inn === "en" || inn === "auto";
+      const inTa = inn === "ta" || inn === "tanglish";
+      if (out === "en" && inEn) {
+        $("outLang").value = "tanglish";
+      } else if ((out === "ta" || out === "tanglish") && inTa) {
+        $("outLang").value = "en";
+      }
+    }
+
+    $("inLang").onchange = sendLang;
+    $("outLang").onchange = sendLang;
+    $("inLang").oninput = sendLang;
+    $("outLang").oninput = sendLang;
+
+    const btn = $("holdBtn");
+    btn.addEventListener("pointerdown", (e) => { e.preventDefault(); startHold(); });
+    btn.addEventListener("pointerup", (e) => { e.preventDefault(); stopHold(); });
+    btn.addEventListener("pointercancel", (e) => { e.preventDefault(); stopHold(); });
+    btn.addEventListener("pointerleave", (e) => { if (recording) stopHold(); });
+
+    $("unlockBtn").onclick = async () => {
+      try {
+        await ensureMic();
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        await audioCtx.resume();
+        // Unlock playback with silent buffer
+        const buf = audioCtx.createBuffer(1, 1, 22050);
+        const src = audioCtx.createBufferSource();
+        src.buffer = buf;
+        src.connect(audioCtx.destination);
+        src.start(0);
+        message("Microphone and audio unlocked.");
+      } catch (err) {
+        message("Microphone permission is required.\n\nPlease allow microphone access\nand reload this page.", true);
+      }
+    };
+
+    if (!sessionId || !role || !token || (role !== "A" && role !== "B")) {
+      message("Invalid QR link. Scan again from the laptop dashboard.", true);
+      setStatus("Invalid", "");
+    } else {
+      connect();
+    }
+  </script>
+</body>
+</html>

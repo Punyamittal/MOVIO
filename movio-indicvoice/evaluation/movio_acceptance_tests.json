@@ -1,0 +1,142 @@
+[
+  {
+    "id": "BOOK_001",
+    "category": "booking",
+    "input": "Book a cab for tomorrow 9 AM from Velachery to Guindy.",
+    "expected_behavior": "Preserve place names; spoken time for 9 AM; keep cab untranslated",
+    "must_preserve": ["cab", "Velachery", "Guindy"]
+  },
+  {
+    "id": "BOOK_002",
+    "category": "booking",
+    "input": "Naan Guindy ku cab book pannanum, evening 7:30 PM ku.",
+    "expected_behavior": "Time spoken naturally; cab stays Latin",
+    "must_preserve": ["cab"]
+  },
+  {
+    "id": "CANCEL_001",
+    "category": "cancellation",
+    "input": "Cancel my cab scheduled for 5:30 PM today.",
+    "expected_behavior": "Spoken time; cancel/cab preserved",
+    "must_preserve": ["cab"]
+  },
+  {
+    "id": "CANCEL_002",
+    "category": "cancellation",
+    "input": "Cancel the booking ID BK8821 for tonight 9 PM.",
+    "expected_behavior": "Booking ID letter/digit expansion; booking preserved",
+    "must_preserve": ["booking"]
+  },
+  {
+    "id": "ARRIVE_001",
+    "category": "driver_arrival",
+    "input": "Unga driver 5 minutes la vandhuruvaanga.",
+    "expected_behavior": "driver preserved in Latin; 5 as cardinal",
+    "must_preserve": ["driver"]
+  },
+  {
+    "id": "ARRIVE_002",
+    "category": "driver_arrival",
+    "input": "Cab TN45AB1234 gate la wait pannitu irukku.",
+    "expected_behavior": "Plate letter-by-letter + digit-by-digit; cab preserved",
+    "must_preserve": ["cab", "TN45AB1234 as separated letters/digits"]
+  },
+  {
+    "id": "PICK_001",
+    "category": "pickup",
+    "input": "Pickup location Guindy bus stand opposite ah confirm pannunga.",
+    "expected_behavior": "pickup and location stay Latin",
+    "must_preserve": ["pickup", "location", "Guindy"]
+  },
+  {
+    "id": "PICK_002",
+    "category": "pickup",
+    "input": "Please come to Gate 3 Airport pickup at 10:45 AM.",
+    "expected_behavior": "Spoken time; airport/pickup preserved",
+    "must_preserve": ["airport", "pickup"]
+  },
+  {
+    "id": "DROP_001",
+    "category": "drop",
+    "input": "OMR Sholinganallur ku drop pannunga.",
+    "expected_behavior": "drop preserved; OMR preserved",
+    "must_preserve": ["drop", "OMR"]
+  },
+  {
+    "id": "DROP_002",
+    "category": "drop",
+    "input": "Drop me at Central station by 6:20 PM.",
+    "expected_behavior": "Spoken time; drop/station preserved",
+    "must_preserve": ["drop", "station"]
+  },
+  {
+    "id": "PAY_001",
+    "category": "payment",
+    "input": "Payment UPI la settle pannalam, fare ₹245.",
+    "expected_behavior": "Currency to spoken rupees; payment preserved",
+    "must_preserve": ["payment"]
+  },
+  {
+    "id": "PAY_002",
+    "category": "payment",
+    "input": "Fare estimate Guindy to Airport roughly 12 km.",
+    "expected_behavior": "Distance spoken; airport preserved",
+    "must_preserve": ["airport"]
+  },
+  {
+    "id": "OTP_001",
+    "category": "otp",
+    "input": "Your OTP is 4821",
+    "expected_behavior": "digit-by-digit: four eight two one",
+    "must_preserve": ["4821 as separated digits", "OTP"]
+  },
+  {
+    "id": "OTP_002",
+    "category": "otp",
+    "input": "OTP 7390 enter pannunga to start the trip.",
+    "expected_behavior": "digit-by-digit for 7390; OTP preserved",
+    "must_preserve": ["7390 as separated digits", "OTP"]
+  },
+  {
+    "id": "TRAFFIC_001",
+    "category": "traffic",
+    "input": "Traffic heavy ah irukku on OMR, delay aagum.",
+    "expected_behavior": "traffic and OMR preserved in Latin",
+    "must_preserve": ["traffic", "OMR"]
+  },
+  {
+    "id": "TRAFFIC_002",
+    "category": "traffic",
+    "input": "Peak hour traffic from 6 PM to 8:30 PM near T Nagar.",
+    "expected_behavior": "Spoken times; traffic preserved",
+    "must_preserve": ["traffic"]
+  },
+  {
+    "id": "COMP_001",
+    "category": "complaints",
+    "input": "Driver rude ah speak pannanga — complaint raise pannunga.",
+    "expected_behavior": "driver preserved",
+    "must_preserve": ["driver"]
+  },
+  {
+    "id": "COMP_002",
+    "category": "complaints",
+    "input": "Payment double charged for booking ID 88421.",
+    "expected_behavior": "payment/booking preserved; numeric id handled",
+    "must_preserve": ["payment", "booking"]
+  },
+  {
+    "id": "PHONE_001",
+    "category": "general_conversation",
+    "input": "Please call 9876543210 if the cab is delayed.",
+    "expected_behavior": "phone digit-by-digit; cab preserved",
+    "must_preserve": ["9876543210 as separated digits", "cab"]
+  },
+  {
+    "id": "DIST_001",
+    "category": "driver_arrival",
+    "input": "Driver 200 metres away from your location.",
+    "expected_behavior": "distance spoken; driver/location preserved",
+    "must_preserve": ["driver", "location"]
+  }
+]

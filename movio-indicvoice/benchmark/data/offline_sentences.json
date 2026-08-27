@@ -1,0 +1,209 @@
+[
+  {
+    "text": "Naan Guindy ku cab book pannanum, evening 7:30 PM ku.",
+    "category": "booking",
+    "language_mix": "tanglish"
+  },
+  {
+    "text": "Booking for tomorrow 9 AM from Velachery to Airport.",
+    "category": "booking",
+    "language_mix": "mixed"
+  },
+  {
+    "text": "Booking cancel pannunga please, plans change aagiruchu.",
+    "category": "cancellation",
+    "language_mix": "tanglish"
+  },
+  {
+    "text": "Cancel my cab scheduled for 5:30 PM today.",
+    "category": "cancellation",
+    "language_mix": "english"
+  },
+  {
+    "text": "உங்க driver ஐந்து நிமிடத்துல வந்துருவாங்க.",
+    "category": "driver_arrival",
+    "language_mix": "tanglish",
+    "stress": [
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "Driver has arrived at your pickup point near Guindy.",
+    "category": "driver_arrival",
+    "language_mix": "english"
+  },
+  {
+    "text": "Cab TN45AB1234 gate la wait pannitu irukku.",
+    "category": "driver_arrival",
+    "language_mix": "tanglish"
+  },
+  {
+    "text": "Pickup location Guindy bus stand opposite ah confirm pannunga.",
+    "category": "pickup",
+    "language_mix": "tanglish"
+  },
+  {
+    "text": "Please come to Gate 3 Airport pickup at 10:45 AM.",
+    "category": "pickup",
+    "language_mix": "english"
+  },
+  {
+    "text": "Drop location Adyar signal nearby office building.",
+    "category": "drop",
+    "language_mix": "mixed"
+  },
+  {
+    "text": "OMR Sholinganallur ku drop pannunga.",
+    "category": "drop",
+    "language_mix": "tanglish"
+  },
+  {
+    "text": "Payment UPI la settle pannalam, fare ₹245.",
+    "category": "payment",
+    "language_mix": "tanglish"
+  },
+  {
+    "text": "Fare estimate Guindy to Airport roughly 12 km.",
+    "category": "payment",
+    "language_mix": "mixed"
+  },
+  {
+    "text": "Your OTP is 4821 — share with driver only.",
+    "category": "otp",
+    "language_mix": "english"
+  },
+  {
+    "text": "OTP 7390 enter pannunga to start the trip.",
+    "category": "otp",
+    "language_mix": "tanglish"
+  },
+  {
+    "text": "Traffic heavy ah irukku on OMR, delay aagum.",
+    "category": "traffic",
+    "language_mix": "tanglish"
+  },
+  {
+    "text": "Peak hour traffic from 6 PM to 8:30 PM near T Nagar.",
+    "category": "traffic",
+    "language_mix": "mixed"
+  },
+  {
+    "text": "Driver rude ah speak pannanga — complaint raise pannunga.",
+    "category": "complaints",
+    "language_mix": "tanglish"
+  },
+  {
+    "text": "AC work aagala during my 3 PM Airport trip.",
+    "category": "complaints",
+    "language_mix": "tanglish"
+  },
+  {
+    "text": "Call me when you reach the gate at 9:15 AM.",
+    "category": "general_conversation",
+    "language_mix": "english"
+  },
+  {
+    "text": "Okay sir, reaching in five minutes from Porur.",
+    "category": "general_conversation",
+    "language_mix": "mixed"
+  },
+  {
+    "text": "Please call 9876543210 if the cab is delayed.",
+    "category": "general_conversation",
+    "language_mix": "english"
+  },
+  {
+    "text": "Booking ID BK8821 confirmed for Anna Nagar pickup.",
+    "category": "booking",
+    "language_mix": "mixed"
+  },
+  {
+    "text": "Toll ₹45 add aagum for ECR route.",
+    "category": "payment",
+    "language_mix": "tanglish"
+  },
+  {
+    "text": "Driver 200 metres away from your location.",
+    "category": "driver_arrival",
+    "language_mix": "english"
+  },
+  {
+    "text": "உங்க driver கிண்டி நுழைவாயில் அருகில் காத்திட்டு இருக்காரு.",
+    "category": "driver_arrival",
+    "language_mix": "tanglish",
+    "stress": [
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "OTP 4821-ஐ driver-கிட்ட மட்டும் பகிருங்கள்.",
+    "category": "otp",
+    "language_mix": "tanglish",
+    "stress": [
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "நான் வேளச்சேரிக்கு cab book பண்ணனும்.",
+    "category": "booking",
+    "language_mix": "ta"
+  },
+  {
+    "text": "OMR-ல போக்குவரத்து நெரிசல், தாமதம் ஆகும் — சொல்லுங்கள்.",
+    "category": "traffic",
+    "language_mix": "tanglish",
+    "stress": [
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "டிரைவர் பத்து நிமிடத்தில் வருவார்.",
+    "category": "driver_arrival",
+    "language_mix": "ta"
+  },
+  {
+    "text": "போரூர் toll plaza-ல வாடிக்கையாளர் காத்திட்டு இருக்காங்க.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "நான் இப்போ இரண்டு பெரிய suitcase-ஓட நிற்கிறேன், driver-ஐ கிட்ட வரச் சொல்லுங்கள்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "Driver சொன்னாரு ஐந்து நிமிடத்துல வருவேன்னு, ஆனா நான் பதினைஞ்சு நிமிடமா காத்திருக்கேன்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "தவறான இடம் book ஆயிடுச்சு — cancel பண்ணி வேளச்சேரிக்கு மறுபடி book பண்ணுங்கள்.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  },
+  {
+    "text": "நான் அண்ணா நகர்ல இருக்கேன், driver எழும்பூர் பக்கம் போயிட்டாரு போல.",
+    "category": "tanglish_mix",
+    "language_mix": "tanglish",
+    "stress": [
+      "tanglish",
+      "tamil_dense"
+    ]
+  }
+]

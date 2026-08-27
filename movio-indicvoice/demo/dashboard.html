@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>movio voice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0a1628;
+      --mute: #5a6a7a;
+      --faint: #94a3b0;
+      --line: #cfd8e0;
+      --field: rgba(255, 255, 255, 0.9);
+      --teal: #0f6e6e;
+      --danger: #b42318;
+      --paper: #edf1f4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: "Manrope", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      overflow-x: hidden;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 100vh;
+      isolation: isolate;
+    }
+
+    .atmosphere {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 55% at 12% -10%, rgba(15, 110, 110, 0.18), transparent 55%),
+        radial-gradient(ellipse 70% 50% at 100% 0%, rgba(10, 22, 40, 0.08), transparent 50%),
+        linear-gradient(165deg, #f4f7f9 0%, #e8eef2 48%, #dfe8ec 100%);
+    }
+
+    .noise {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 36rem;
+      margin: 0 auto;
+      padding: clamp(2.5rem, 8vh, 3.5rem) 1.25rem 4rem;
+      animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .topbar-left {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .topbar button {
+      background: none;
+      border: 0;
+      font: inherit;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--mute);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: transparent;
+    }
+    .topbar button:hover {
+      color: var(--ink);
+      text-decoration-color: currentColor;
+    }
+    .topbar button.mode {
+      text-decoration: none;
+      border: 1px solid var(--line);
+      padding: 0.28rem 0.55rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+      font-size: 0.65rem;
+    }
+    .topbar button.mode.on {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+
+    main.wide {
+      max-width: 56rem;
+    }
+
+    .phones-block {
+      padding: 0.75rem;
+    }
+    .phones-block iframe {
+      width: 100%;
+      height: min(78vh, 920px);
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .phones-hint {
+      margin-top: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--mute);
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--mute);
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--faint);
+    }
+    .status-dot.on { background: var(--teal); }
+    .status-dot.off { background: var(--danger); }
+
+    .brand {
+      font-family: "Syne", sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.75rem, 10vw, 3.75rem);
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+    }
+    .brand span { color: var(--teal); }
+
+    .sub {
+      max-width: 28ch;
+      margin-top: 1rem;
+      margin-bottom: 2.5rem;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: var(--mute);
+    }
+
+    .block {
+      display: grid;
+      gap: 1.5rem;
+      animation: fadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 560px) {
+      .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    label, .label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mute);
+      margin-bottom: 0.5rem;
+    }
+
+    .msg-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    .msg-head .label { margin: 0; }
+
+    textarea,
+    select,
+    input[type="text"] {
+      width: 100%;
+      background: var(--field);
+      border: 1px solid var(--line);
+      border-radius: 0;
+      color: var(--ink);
+      padding: 0.7rem 0.9rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    textarea:focus,
+    select:focus,
+    input[type="text"]:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 1px rgba(15, 110, 110, 0.35);
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+    select {
+      appearance: none;
+      cursor: pointer;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--mute) 50%),
+        linear-gradient(135deg, var(--mute) 50%, transparent 50%);
+      background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--mute);
+      margin: 0;
+    }
+    .check input {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1px solid var(--line);
+      background: var(--field);
+      flex-shrink: 0;
+      cursor: pointer;
+      position: relative;
+    }
+    .check input:checked {
+      background: var(--teal);
+      border-color: var(--teal);
+    }
+    .check input:checked::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 5px;
+      height: 9px;
+      border: solid #fff;
+      border-width: 0 1.5px 1.5px 0;
+      transform: rotate(45deg);
+    }
+
+    #endpoint-wrap { display: none; }
+    #endpoint-wrap.open { display: block; }
+
+    button#go {
+      width: 100%;
+      border: 0;
+      border-radius: 0;
+      background: var(--ink);
+      color: #fff;
+      font-family: "Syne", sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      padding: 0.95rem 1.25rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    button#go:hover:not(:disabled) { background: var(--teal); }
+    button#go:disabled { opacity: 0.5; cursor: wait; }
+
+    .err {
+      color: var(--danger);
+      font-size: 0.875rem;
+      font-weight: 500;
+      white-space: pre-wrap;
+      min-height: 0;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+    .metric {
+      padding: 1rem 1.1rem;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(6px);
+    }
+    .metric span {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mute);
+      margin-bottom: 0.35rem;
+    }
+    .metric strong {
+      font-family: "Syne", sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .metric strong em {
+      font-style: normal;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--faint);
+      margin-left: 0.2rem;
+    }
+
+    .norm {
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      line-height: 1.55;
+      color: var(--mute);
+      border-top: 1px solid var(--line);
+      padding-top: 1rem;
+    }
+
+    audio {
+      width: 100%;
+      height: 40px;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="atmosphere" aria-hidden="true"></div>
+    <div class="noise" aria-hidden="true"></div>
+
+    <main>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button type="button" id="toggle-endpoint">Endpoint</button>
+          <button type="button" id="mode-tts" class="mode on">Generate</button>
+          <button type="button" id="mode-phones">Two-phone test</button>
+        </div>
+        <div class="status">
+          <span class="status-dot" id="status-dot" aria-hidden="true"></span>
+          <span id="status-text">Ready</span>
+        </div>
+      </div>
+
+      <h1 class="brand">movio<span>voice</span></h1>
+      <p class="sub" id="page-sub">
+        Taxi-domain TTS for Tanglish, Tamil, and English — low-latency speech for rider updates.
+      </p>
+
+      <div id="tts-panel" class="block">
+        <div id="endpoint-wrap">
+          <label for="server">Server</label>
+          <input id="server" type="text" value="http://127.0.0.1:8001" />
+        </div>
+
+        <div>
+          <div class="msg-head">
+            <span class="label">Message</span>
+          </div>
+          <textarea id="text">Unga driver 5 minutes la vandhuruvaanga. OTP 4821 share pannunga.</textarea>
+        </div>
+
+        <div class="row-3">
+          <div>
+            <label for="target_lang">Language</label>
+            <select id="target_lang">
+              <option value="tanglish" selected>Tanglish</option>
+              <option value="en">English</option>
+              <option value="ta">Tamil</option>
+              <option value="auto">Auto</option>
+            </select>
+          </div>
+          <div>
+            <label for="backend">Engine</label>
+            <select id="backend">
+              <option value="edge_fast" selected>Neural · Edge</option>
+              <option value="win_sapi">Turbo · local</option>
+            </select>
+          </div>
+          <div>
+            <label for="voice">Voice</label>
+            <select id="voice">
+              <option value="Jaya speaks in a clear, calm, moderate-pitched voice at a moderate pace. The recording is of very high quality with no background noise." selected>Jaya — Tamil</option>
+              <option value="Kavitha's voice is clear and slightly expressive, with a moderate pitch and pace. The recording is very high quality with no background noise.">Kavitha — Tamil</option>
+              <option value="Divya's voice is monotone yet slightly fast in delivery, with a very close recording that almost has no background noise.">Divya — English</option>
+              <option value="Rohit speaks in a clear male voice at a moderate pace and pitch. The recording is of very high quality with no background noise.">Rohit — English</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="check" for="skip_llm">
+          <input id="skip_llm" type="checkbox" checked />
+          Skip Tanglish LLM polish (keep on — Ollama adds seconds)
+        </label>
+
+        <button id="go">Generate speech</button>
+        <div class="err" id="err"></div>
+
+        <div class="metrics">
+          <div class="metric">
+            <span>TTFA</span>
+            <strong id="ttfa">—<em>ms</em></strong>
+          </div>
+          <div class="metric">
+            <span>Full synth</span>
+            <strong id="full">—<em>ms</em></strong>
+          </div>
+          <div class="metric">
+            <span>Preprocess</span>
+            <strong id="pre">—<em>ms</em></strong>
+          </div>
+        </div>
+        <p class="norm" id="norm"></p>
+        <audio id="player" controls></audio>
+      </div>
+
+      <div id="phones-panel" class="block phones-block" hidden>
+        <iframe
+          id="phones-frame"
+          title="Two-phone voice translation test"
+          src="about:blank"
+        ></iframe>
+        <p class="phones-hint">
+          Phones must use the LAN IP shown in the panel (not localhost). Same Wi-Fi as this laptop.
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const queue = [];
+    let playing = false;
+
+    $("toggle-endpoint").onclick = () => {
+      const wrap = $("endpoint-wrap");
+      if (!wrap) return;
+      const open = wrap.classList.toggle("open");
+      $("toggle-endpoint").textContent = open ? "Hide endpoint" : "Endpoint";
+    };
+
+    function setMode(mode) {
+      const phones = mode === "phones";
+      $("tts-panel").hidden = phones;
+      $("phones-panel").hidden = !phones;
+      $("mode-tts").classList.toggle("on", !phones);
+      $("mode-phones").classList.toggle("on", phones);
+      document.querySelector("main").classList.toggle("wide", phones);
+      $("page-sub").textContent = phones
+        ? "Two-phone local test — scan QR codes so both phones talk through this laptop."
+        : "Taxi-domain TTS for Tanglish, Tamil, and English — low-latency speech for rider updates.";
+      if (phones) {
+        const base = ($("server").value || "http://127.0.0.1:8001").replace(/\/$/, "");
+        $("phones-frame").src = base + "/test/?embed=1";
+      }
+    }
+    $("mode-tts").onclick = () => setMode("tts");
+    $("mode-phones").onclick = () => setMode("phones");
+
+    function setMetric(id, value) {
+      $(id).innerHTML = (value ?? "—") + "<em>ms</em>";
+    }
+
+    function b64ToUrl(b64, fmt) {
+      const binary = atob(b64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const mime = fmt === "mp3" ? "audio/mpeg" : "audio/wav";
+      return URL.createObjectURL(new Blob([bytes], { type: mime }));
+    }
+
+    // Tiny silent WAV — unlocks autoplay during the Generate click gesture.
+    const SILENT_WAV =
+      "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=";
+
+    async function unlockAudio() {
+      const player = $("player");
+      try {
+        player.src = SILENT_WAV;
+        player.muted = false;
+        await player.play();
+        player.pause();
+        player.currentTime = 0;
+      } catch (_) {
+        /* browser may still allow later play after the click */
+      }
+    }
+
+    function playNext() {
+      if (playing) return;
+      const next = queue.shift();
+      if (!next) return;
+      playing = true;
+      const player = $("player");
+      if (player._objUrl) URL.revokeObjectURL(player._objUrl);
+      player._objUrl = next;
+      player.src = next;
+      player.onended = () => {
+        playing = false;
+        playNext();
+      };
+      player.onerror = () => {
+        playing = false;
+        playNext();
+      };
+      const start = () => {
+        player.play().catch((err) => {
+          console.warn("autoplay blocked", err);
+          playing = false;
+        });
+      };
+      if (player.readyState >= 2) start();
+      else player.oncanplay = () => {
+        player.oncanplay = null;
+        start();
+      };
+    }
+
+    function enqueueChunk(b64, fmt) {
+      queue.push(b64ToUrl(b64, fmt || "wav"));
+      playNext();
+    }
+
+    $("go").onclick = async () => {
+      $("err").textContent = "";
+      $("go").disabled = true;
+      $("status-dot").className = "status-dot";
+      $("status-text").textContent = "Synthesizing";
+      setMetric("ttfa", "…");
+      setMetric("full", "…");
+      setMetric("pre", "…");
+      $("norm").textContent = "";
+      queue.length = 0;
+      playing = false;
+      let streamedChunks = 0;
+
+      await unlockAudio();
+
+      const base = $("server").value.replace(/\/$/, "");
+      const wsUrl = base.replace(/^http/, "ws") + "/tts/stream";
+      const tClient = performance.now();
+
+      try {
+        await new Promise((resolve, reject) => {
+          const ws = new WebSocket(wsUrl);
+          let settled = false;
+          ws.onopen = () => {
+            ws.send(JSON.stringify({
+              text: $("text").value,
+              voice_style: $("voice").value,
+              skip_llm: $("skip_llm").checked,
+              backend: $("backend").value,
+              target_lang: $("target_lang").value,
+            }));
+          };
+          ws.onmessage = (ev) => {
+            const msg = JSON.parse(ev.data);
+            if (msg.type === "chunk") {
+              if (msg.index === 0) {
+                const clientTtfa = Math.round(performance.now() - tClient);
+                setMetric("ttfa", msg.ttfa_ms ?? clientTtfa);
+                if (msg.preprocessing_ms != null) setMetric("pre", msg.preprocessing_ms);
+                if (msg.normalized_text) {
+                  const bits = [];
+                  if (msg.detected_lang || msg.target_lang) {
+                    bits.push((msg.detected_lang || "?") + " → " + (msg.target_lang || "?"));
+                  }
+                  if (msg.translator_engine) bits.push("[" + msg.translator_engine + "]");
+                  const spoken = (msg.normalized_text || msg.translated_text || "").trim();
+                  const translated = (msg.translated_text || "").trim();
+                  if (translated && spoken.toLowerCase() !== translated.toLowerCase()) {
+                    bits.push(translated);
+                  }
+                  if (spoken) bits.push(spoken);
+                  $("norm").textContent = bits.join(" · ");
+                }
+              }
+              if (msg.audio_b64) {
+                streamedChunks += 1;
+                enqueueChunk(msg.audio_b64, msg.audio_format);
+              }
+            } else if (msg.type === "done") {
+              setMetric("full", msg.full_synthesis_ms ?? "—");
+              if (msg.ttfa_ms != null) setMetric("ttfa", msg.ttfa_ms);
+              if (msg.preprocessing_ms != null) setMetric("pre", msg.preprocessing_ms);
+              if (msg.normalized_text || msg.translated_text) {
+                const bits = [];
+                if (msg.detected_lang || msg.target_lang) {
+                  bits.push((msg.detected_lang || "?") + " → " + (msg.target_lang || "?"));
+                }
+                if (msg.translator_engine) bits.push("[" + msg.translator_engine + "]");
+                const spoken = (msg.normalized_text || msg.translated_text || "").trim();
+                const translated = (msg.translated_text || "").trim();
+                if (translated && spoken.toLowerCase() !== translated.toLowerCase()) {
+                  bits.push(translated);
+                }
+                if (spoken) bits.push(spoken);
+                $("norm").textContent = bits.join(" · ");
+              }
+              // Auto-play final audio only when no chunk audio was streamed
+              // (avoids double-playing the same utterance).
+              if (msg.audio_b64 && streamedChunks === 0) {
+                enqueueChunk(msg.audio_b64, msg.audio_format);
+              }
+              settled = true;
+              ws.close();
+              resolve();
+            } else if (msg.type === "error") {
+              settled = true;
+              reject(new Error(msg.detail || "stream error"));
+            }
+          };
+          ws.onerror = () => {
+            if (!settled) reject(new Error("WebSocket failed — is the server running?"));
+          };
+          ws.onclose = () => {
+            if (!settled) reject(new Error("WebSocket closed early"));
+          };
+        });
+        $("status-dot").className = "status-dot on";
+        $("status-text").textContent = "API online";
+      } catch (e) {
+        $("err").textContent = String(e);
+        setMetric("ttfa", "—");
+        setMetric("full", "—");
+        setMetric("pre", "—");
+        $("status-dot").className = "status-dot off";
+        $("status-text").textContent = "API offline";
+      } finally {
+        $("go").disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>
