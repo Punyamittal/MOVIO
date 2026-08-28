@@ -1,116 +1,134 @@
 ![Project Banner](docs/readme-agent/banner.svg)
 
-# 🎙️ MOVIO: Indic Voice Synthesis and Evaluation Platform
-
-MOVIO is a comprehensive, multi-functional platform designed for the synthesis, evaluation, and benchmarking of Indic languages' voice models. It provides a robust, end-to-end solution covering text normalization, advanced Text-to-Speech (TTS) generation, and rigorous performance metric calculation.
+# MOVIO System Documentation
 
 ## 🚀 Overview
 
-MOVIO operates on a three-tier architecture, separating the user interface (Client), the business logic and API gateway (Backend), and the core computational models (Services). This separation ensures scalability, maintainability, and the ability to independently update complex components like TTS models or metric calculators.
+MOVIO is a comprehensive, three-tiered AI platform designed for advanced Text-to-Speech (TTS) synthesis, voice cloning, and rigorous performance benchmarking. The system provides end-to-end capabilities, from raw data ingestion and model training to real-time API deployment and detailed performance metric calculation.
 
 ### Key Features
-*   **Indic Language Support:** Specialized handling for diverse Indian languages.
-*   **End-to-End TTS:** Seamless pipeline from raw text input to high-quality audio output.
-*   **Automated Benchmarking:** Calculates industry-standard metrics (e.g., Word Error Rate, True Tone Feature Accuracy) for model comparison.
-*   **Scalable Architecture:** Built using modern frameworks (FastAPI, Next.js) for enterprise deployment.
+*   **Advanced TTS Synthesis:** High-fidelity voice generation with customizable parameters.
+*   **Voice Cloning:** Ability to synthesize speech using provided voice samples.
+*   **Performance Benchmarking:** Automated evaluation of model quality using industry-standard metrics (e.g., WER, TTFA).
+*   **Scalable Architecture:** Built on a microservices approach (Frontend/Backend/Core AI) for robust deployment.
 
-## 🏗️ Architecture and Components
+## 🏗️ System Architecture
 
-The system is structured into three primary layers:
+The MOVIO platform operates on a three-tier architecture, ensuring separation of concerns and scalability.
 
-### 1. Client (Frontend)
-*   **Technology:** Next.js / React
-*   **Role:** Handles the User Interface (UI). It is responsible for capturing user input (text, language selection), displaying results (audio player, metrics), and making asynchronous API calls to the Backend.
+### 1. Client/Frontend (React/NPM)
+*   **Role:** Provides the user interface for interacting with the system. It handles user input, displays results, and manages the overall workflow state.
+*   **Technology:** React.js.
+*   **Interaction:** Communicates exclusively with the Backend API.
 
-### 2. Backend (API Gateway)
-*   **Technology:** FastAPI / Python
-*   **Role:** Acts as the central orchestrator. It receives requests from the Client, validates input, manages state, and routes the request to the appropriate core service (TTS or Benchmarking). It handles authentication and rate limiting.
+### 2. Backend (Python/FastAPI)
+*   **Role:** Acts as the primary API gateway and orchestration layer. It receives requests from the Frontend, validates inputs, manages session state, and calls the appropriate services within the Core AI layer.
+*   **Technology:** Python, FastAPI.
+*   **Interaction:** Coordinates data flow between the Frontend and the Core AI Services.
 
-### 3. Core Services (Computational Logic)
-*   **Technology:** Python Modules (PyTorch, Transformers, etc.)
-*   **Role:** Contains the heavy lifting. These services are isolated and include:
-    *   **Text Normalization:** Converts raw text (e.g., numbers, abbreviations) into a standardized format suitable for TTS.
-    *   **TTS Engine:** The core model that converts normalized text embeddings into audio waveforms.
-    *   **Metrics Engine:** Calculates quantitative performance scores (WER, TTFA, etc.) by comparing generated output against ground truth data.
+### 3. Core AI Services (PyTorch/CUDA)
+*   **Role:** Contains the heavy computational lifting. This layer houses the specialized models for TTS synthesis, voice feature extraction, and the benchmarking logic.
+*   **Technology:** PyTorch, CUDA (GPU acceleration is mandatory for optimal performance).
+*   **Components:**
+    *   **TTS Engine:** Handles the actual audio generation.
+    *   **Feature Extractor:** Processes raw audio/text into usable model inputs.
+    *   **Benchmarking Module:** Executes evaluation scripts and calculates metrics.
 
-## ⚙️ Core Functionality Pipelines
+## ⚙️ Core Functionality & Pipelines
 
-### 🎤 Text-to-Speech (TTS) Synthesis
-This pipeline is triggered when a user submits text for synthesis.
+### 🎙️ Text-to-Speech (TTS) Synthesis Pipeline
 
-1.  **Input:** Raw Text + Language ID $ightarrow$ Backend API.
-2.  **Normalization:** The text is passed through the Normalization Service to clean and standardize the input.
-3.  **Synthesis:** The normalized text is fed into the TTS Engine, which generates the audio waveform.
-4.  **Output:** The audio data is streamed back through the Backend to the Client for playback.
+1.  **Input:** User provides text and optional voice profile ID (or sample audio for cloning).
+2.  **Preprocessing:** The Backend sends the request to the Core AI. The Feature Extractor normalizes the text and extracts necessary voice embeddings.
+3.  **Synthesis:** The TTS Engine generates the raw audio waveform.
+4.  **Output:** The synthesized audio is streamed back through the Backend to the Frontend for playback and download.
 
-### 📊 Benchmarking and Evaluation
-This pipeline is used to compare multiple models against a dataset.
+### 📊 Benchmarking and Evaluation Pipeline
 
-1.  **Data Ingestion:** A dataset (text, ground truth audio) is uploaded/referenced.
-2.  **Execution:** The Backend iterates through registered models, running the TTS pipeline for each one.
-3.  **Metric Calculation:** The Metrics Engine compares the generated audio/text against the ground truth, calculating scores like Word Error Rate (WER) and True Tone Feature Accuracy (TTFA).
-4.  **Storage & Display:** Results are persisted in the database and displayed on the Client dashboard.
+This pipeline is used to measure the quality and efficiency of the synthesized audio against ground truth data.
 
-## 🛠️ Setup and Installation Guide
+1.  **Data Ingestion:** Evaluation data (text transcripts and reference audio) are uploaded to the system.
+2.  **Execution:** The Benchmarking Module runs comparison algorithms against the generated audio.
+3.  **Metrics Calculation:** Key performance indicators (KPIs) are calculated.
+4.  **Visualization:** Results are displayed on the Frontend, providing a clear assessment of model performance.
 
-**Prerequisites:**
-*   Python 3.8+ environment.
-*   NVIDIA GPU with CUDA installed (Highly recommended for model inference).
-*   `pip` and `npm` installed.
+## 💻 Technical Setup and Installation
 
-### Step 1: Backend Setup (API Gateway & Services)
+**⚠️ Prerequisites:**
+*   Python 3.8+ (Required for Backend and Core AI).
+*   Node.js and NPM (Required for Frontend).
+*   **CUDA Toolkit:** Installation of the correct CUDA version is mandatory for the Core AI services to run efficiently.
+
+### 1. Backend Setup (Python)
 
 ```bash
-# 1. Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate
+# Clone the repository
+git clone <repository-url>
+cd movio-backend
 
-# 2. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
-
-# 3. Log in to Hugging Face (if required for model access)
-huggingface-cli login
 ```
 
-### Step 2: Frontend Setup (Client)
+### 2. Core AI Setup (PyTorch/CUDA)
 
 ```bash
-# 1. Navigate to the client directory
-cd client
+# Navigate to the core AI directory
+cd movio-core-ai
 
-# 2. Install Node dependencies
+# Install PyTorch with CUDA support (Example command)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# Run the setup script
+python setup.py install
+```
+
+### 3. Frontend Setup (React/NPM)
+
+```bash
+# Navigate to the frontend directory
+cd movio-frontend
+
+# Install dependencies
 npm install
 ```
 
-### Step 3: Running the Application
+## 🚀 Running the System
 
-**NOTE:** The application requires two separate terminals to run concurrently.
+**IMPORTANT:** The system must be run in a specific order, utilizing separate terminals for each service.
 
-**Terminal 1 (Backend):**
-```bash
-# Ensure you are in the root directory and venv is active
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-**Terminal 2 (Frontend):**
-```bash
-# Ensure you are in the client directory
-npm run dev
-```
+1.  **Start Core AI Services:** (Terminal 1)
+    ```bash
+    python movio-core-ai/run_server.py
+    ```
+2.  **Start Backend API:** (Terminal 2)
+    ```bash
+    uvicorn movio-backend.main:app --reload
+    ```
+3.  **Start Frontend Client:** (Terminal 3)
+    ```bash
+    npm run dev
+    ```
 
 ## 🌐 API Endpoints Summary
 
-| Endpoint | Method | Description | Purpose | Status | 
-| :--- | :--- | :--- | :--- | :--- | 
-| `/api/v1/tts/synthesize` | POST | Generates audio from text input. | TTS Synthesis | Available | 
-| `/api/v1/benchmark/run` | POST | Initiates a model benchmarking run. | Evaluation | Available | 
-| `/api/v1/status` | GET | Checks the operational status of the platform. | Health Check | Available | 
+The Backend exposes several key endpoints for managing the system lifecycle:
 
-## 📚 Data Model
+| Endpoint | Method | Description | Usage | 
+| :--- | :--- | :--- | :--- |
+| `/api/v1/tts/synthesize` | POST | Generates audio from text and voice profile. | Requires `text` and `voice_id` in body. |
+| `/api/v1/benchmark/upload` | POST | Uploads evaluation data (text/audio pairs). | Used to initiate benchmarking runs. |
+| `/api/v1/benchmark/results` | GET | Retrieves calculated performance metrics. | Requires `run_id` parameter. |
+| `/api/v1/status` | GET | Checks the operational status of the core services. | Useful for health checks. |
 
-*   **`SynthesisRequest`:** Contains `text` (string), `language_code` (string), and `model_id` (string). Used for TTS.
-*   **`BenchmarkJob`:** Contains `dataset_id` (string), `models` (list of strings), and `start_time` (datetime). Used for evaluation.
-*   **`Result`:** Stores the output, including `audio_url`, `metrics` (JSON object), and `timestamp`.
+## 📈 Performance Metrics
+
+The system tracks several critical metrics to quantify performance and cost:
+
+*   **Word Error Rate (WER):** Measures the difference between synthesized and reference text.
+*   **Time To First Audio (TTFA):** Measures the latency from request submission to first audio byte received.
+*   **P99 Latency:** The 99th percentile latency, indicating the experience of the slowest 1% of users.
+*   **Operational Cost:** Tracks the estimated computational cost per 1000 characters synthesized.
 
 ## Setup Guide
 
