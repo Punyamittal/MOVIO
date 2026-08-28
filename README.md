@@ -1,4 +1,4 @@
-## MOVIO: Comprehensive Performance Analysis Platform
+## Movio: Comprehensive Performance Analysis Platform
 
 A multi-component platform featuring a dashboard for visualization and backend modules for benchmarking, concurrency testing, and cost analysis.
 
@@ -35,13 +35,6 @@ The repository is logically separated into two main components:
 *   **`dashboard/`**: Contains the frontend assets, configuration, and logic for the user interface. The frontend uses Next.js and React.
 *   **`movio-indicvoice/`**: Houses the core backend logic, utilities, and specialized modules, including benchmarking, concurrency tools, and cost analysis scripts. This component is primarily written in Python.
 
-## Configuration
-
-Configuration for the project can be managed through the following files:
-
-*   `dashboard/tsconfig.json`
-*   `movio-indicvoice/.env.example`
-
 ## Architecture
 
 ### Architecture
@@ -66,8 +59,21 @@ flowchart LR
     s2 --> s3
 ```
 
+## Configuration
+
+Configuration for the project can be managed through the following files:
+
+*   `dashboard/tsconfig.json`
+*   `movio-indicvoice/.env.example`
+
 ## Live Preview
 
 ![Application screenshot](docs/readme-agent/screenshot.png)
 
 _Captured from running dev server at http://127.0.0.1:3456_
+
+## Live Preview
+
+![Application screenshot](docs/readme-agent/screenshot.png)
+
+_Captured from running dev server at http://localhost:3456_
