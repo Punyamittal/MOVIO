@@ -1,136 +1,116 @@
 ![Project Banner](docs/readme-agent/banner.svg)
 
-## 🚀 Project Overview: MOVIO - End-to-End Voice AI Platform
+# 🎙️ MOVIO: Indic Voice Synthesis and Evaluation Platform
 
-This repository contains the complete source code for MOVIO, a sophisticated, full-stack Text-to-Speech (TTS) and Voice AI platform. The system is designed to manage the entire lifecycle of voice generation, from data ingestion and normalization to high-fidelity synthesis and comprehensive performance benchmarking. 
+MOVIO is a comprehensive, multi-functional platform designed for the synthesis, evaluation, and benchmarking of Indic languages' voice models. It provides a robust, end-to-end solution covering text normalization, advanced Text-to-Speech (TTS) generation, and rigorous performance metric calculation.
 
-The architecture is robust, separating concerns cleanly between the Next.js frontend (UI/UX), the FastAPI backend (Business Logic/APIs), and the Python core (AI/ML processing).
+## 🚀 Overview
 
----
+MOVIO operates on a three-tier architecture, separating the user interface (Client), the business logic and API gateway (Backend), and the core computational models (Services). This separation ensures scalability, maintainability, and the ability to independently update complex components like TTS models or metric calculators.
 
-## 🛠️ Getting Started and Setup
+### Key Features
+*   **Indic Language Support:** Specialized handling for diverse Indian languages.
+*   **End-to-End TTS:** Seamless pipeline from raw text input to high-quality audio output.
+*   **Automated Benchmarking:** Calculates industry-standard metrics (e.g., Word Error Rate, True Tone Feature Accuracy) for model comparison.
+*   **Scalable Architecture:** Built using modern frameworks (FastAPI, Next.js) for enterprise deployment.
 
-Setting up MOVIO requires configuring both the Python backend environment and the JavaScript frontend environment. Adherence to the provided setup steps is crucial for successful operation.
+## 🏗️ Architecture and Components
 
-### 1. Prerequisites
+The system is structured into three primary layers:
 
-*   Python 3.x
-*   Node.js and npm
-*   Hugging Face CLI access (for model authentication)
+### 1. Client (Frontend)
+*   **Technology:** Next.js / React
+*   **Role:** Handles the User Interface (UI). It is responsible for capturing user input (text, language selection), displaying results (audio player, metrics), and making asynchronous API calls to the Backend.
 
-### 2. Backend Setup (Python)
+### 2. Backend (API Gateway)
+*   **Technology:** FastAPI / Python
+*   **Role:** Acts as the central orchestrator. It receives requests from the Client, validates input, manages state, and routes the request to the appropriate core service (TTS or Benchmarking). It handles authentication and rate limiting.
 
-1.  **Install Dependencies:**
-    ```bash
-    pip install -r requirements/requirements.txt
-    ```
-2.  **Authenticate Hugging Face:**
-    ```bash
-    huggingface-cli login
-    ```
-    *(Enter your Hugging Face token when prompted.)*
-3.  **Run Backend:** The backend services (FastAPI) should be run independently.
+### 3. Core Services (Computational Logic)
+*   **Technology:** Python Modules (PyTorch, Transformers, etc.)
+*   **Role:** Contains the heavy lifting. These services are isolated and include:
+    *   **Text Normalization:** Converts raw text (e.g., numbers, abbreviations) into a standardized format suitable for TTS.
+    *   **TTS Engine:** The core model that converts normalized text embeddings into audio waveforms.
+    *   **Metrics Engine:** Calculates quantitative performance scores (WER, TTFA, etc.) by comparing generated output against ground truth data.
 
-### 3. Frontend Setup (JavaScript)
+## ⚙️ Core Functionality Pipelines
 
-1.  **Install Dependencies:**
-    ```bash
-    npm install
-    ```
-2.  **Run Frontend:**
-    ```bash
-    npm run dev
-    ```
+### 🎤 Text-to-Speech (TTS) Synthesis
+This pipeline is triggered when a user submits text for synthesis.
 
----
+1.  **Input:** Raw Text + Language ID $ightarrow$ Backend API.
+2.  **Normalization:** The text is passed through the Normalization Service to clean and standardize the input.
+3.  **Synthesis:** The normalized text is fed into the TTS Engine, which generates the audio waveform.
+4.  **Output:** The audio data is streamed back through the Backend to the Client for playback.
 
-## 🧠 System Architecture and Data Flow
+### 📊 Benchmarking and Evaluation
+This pipeline is used to compare multiple models against a dataset.
 
-MOVIO operates on a clear separation of concerns, managed by three primary layers:
+1.  **Data Ingestion:** A dataset (text, ground truth audio) is uploaded/referenced.
+2.  **Execution:** The Backend iterates through registered models, running the TTS pipeline for each one.
+3.  **Metric Calculation:** The Metrics Engine compares the generated audio/text against the ground truth, calculating scores like Word Error Rate (WER) and True Tone Feature Accuracy (TTFA).
+4.  **Storage & Display:** Results are persisted in the database and displayed on the Client dashboard.
 
-### 🌐 Frontend (Next.js/React)
+## 🛠️ Setup and Installation Guide
 
-The client-side application provides the user interface for interacting with the AI services. Key views include:
+**Prerequisites:**
+*   Python 3.8+ environment.
+*   NVIDIA GPU with CUDA installed (Highly recommended for model inference).
+*   `pip` and `npm` installed.
 
-*   **Studio:** The primary workspace for text input, configuration, and initiating synthesis jobs.
-*   **Benchmark:** Dedicated interface for running performance tests against various models and datasets.
-*   **Evaluation:** Displays detailed metrics and performance reports generated by the system.
+### Step 1: Backend Setup (API Gateway & Services)
 
-### ⚙️ Backend (FastAPI/Python)
+```bash
+# 1. Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate
 
-The backend acts as the central API gateway and processing engine. It handles all heavy lifting, including:
+# 2. Install dependencies
+pip install -r requirements.txt
 
-*   **Synthesis:** Calling the core TTS models for audio generation.
-*   **Normalization:** Pre-processing text inputs into standardized formats.
-*   **Data Management:** Storing and retrieving job status, metrics, and configuration data.
+# 3. Log in to Hugging Face (if required for model access)
+huggingface-cli login
+```
 
-### 🐍 Core AI/ML Logic (Python)
+### Step 2: Frontend Setup (Client)
 
-This layer contains the specialized Python modules responsible for the actual voice processing. It includes:
+```bash
+# 1. Navigate to the client directory
+cd client
 
-*   **TTS Models:** The core models for generating speech audio.
-*   **Metrics Calculation:** Implementing complex calculations for industry standards (e.g., WER, TTFA).
-*   **Data Processing:** Handling the ingestion and structuring of JSON corpora and configuration files.
+# 2. Install Node dependencies
+npm install
+```
 
----
+### Step 3: Running the Application
 
-## 📊 Key Operational Pipelines
+**NOTE:** The application requires two separate terminals to run concurrently.
 
-### 1. Text-to-Speech (TTS) Synthesis Flow
+**Terminal 1 (Backend):**
+```bash
+# Ensure you are in the root directory and venv is active
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
-This pipeline describes the journey of a text input to a final audio output:
+**Terminal 2 (Frontend):**
+```bash
+# Ensure you are in the client directory
+npm run dev
+```
 
-1.  **Input:** User provides text via the Frontend Studio.
-2.  **Normalization:** The Backend receives the text and passes it to the Normalization module (Python). This standardizes the text.
-3.  **Synthesis:** The normalized text is passed to the TTS Model, which generates the raw audio data.
-4.  **API Response:** The audio data and metadata are returned to the Frontend via the FastAPI endpoints.
-5.  **Output:** The user receives the synthesized audio file.
+## 🌐 API Endpoints Summary
 
-### 2. Benchmarking and Evaluation Flow
+| Endpoint | Method | Description | Purpose | Status | 
+| :--- | :--- | :--- | :--- | :--- | 
+| `/api/v1/tts/synthesize` | POST | Generates audio from text input. | TTS Synthesis | Available | 
+| `/api/v1/benchmark/run` | POST | Initiates a model benchmarking run. | Evaluation | Available | 
+| `/api/v1/status` | GET | Checks the operational status of the platform. | Health Check | Available | 
 
-This pipeline is dedicated to rigorous performance testing:
+## 📚 Data Model
 
-1.  **Data Ingestion:** Benchmark data (JSON corpora) are loaded into the system.
-2.  **Execution:** The system runs multiple test cases through various TTS models (the 'Runners').
-3.  **Metric Calculation:** For each run, the system calculates critical metrics (e.g., Word Error Rate (WER), Time To First Audio (TTFA), p99 latency, Cost).
-4.  **Aggregation:** All metrics are aggregated and stored in the database.
-5.  **Visualization:** The Frontend Dashboard consumes these metrics to provide a comprehensive evaluation report.
-
----
-
-## 🗺️ API Endpoints Summary
-
-The following endpoints are exposed by the FastAPI backend and are critical for the frontend functionality:
-
-*   `/api/v1/synthesize`: Handles the core text-to-audio synthesis request.
-*   `/api/v1/benchmark/run`: Initiates a benchmark run using specified datasets and models.
-*   `/api/v1/metrics/get`: Retrieves aggregated performance metrics for display on the dashboard.
-
----
-
-## 📚 Technical Deep Dive (Diagram Interpretation)
-
-### 📐 System Architecture
-
-The architecture is a classic three-tier model: Client $ightarrow$ Frontend $ightarrow$ Backend. The Frontend communicates exclusively with the Backend via RESTful API calls, ensuring that the core business logic and AI models remain encapsulated and protected on the server side.
-
-### 📈 Data Flow and Metrics
-
-The data flow emphasizes continuous measurement. The system tracks not only the successful generation of audio but also the performance characteristics of the entire process, including:
-
-*   **Latency:** Measured via TTFA (Time To First Audio) and p99 latency.
-*   **Accuracy:** Measured via WER (Word Error Rate).
-*   **Cost:** Tracking resource consumption per job.
-
-### 🧩 Component Mapping
-
-Each component has a defined role:
-
-*   **Client:** The browser/user interface.
-*   **Frontend:** The Next.js application layer.
-*   **Backend:** The FastAPI layer, managing state and routing.
-*   **TTS Model:** The actual AI engine generating audio.
-*   **Database:** Persistent storage for job history, metrics, and configurations.
+*   **`SynthesisRequest`:** Contains `text` (string), `language_code` (string), and `model_id` (string). Used for TTS.
+*   **`BenchmarkJob`:** Contains `dataset_id` (string), `models` (list of strings), and `start_time` (datetime). Used for evaluation.
+*   **`Result`:** Stores the output, including `audio_url`, `metrics` (JSON object), and `timestamp`.
 
 ## Setup Guide
 
