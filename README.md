@@ -25,8 +25,6 @@ MOVIO utilizes a modern, multi-language stack:
 *   JavaScript
 *   HTML
 *   CSS
-*   Next.js
-*   React
 
 ## Project Structure
 
@@ -37,7 +35,7 @@ The repository is logically separated into two main components:
 
 ## Architecture
 
-### Architecture
+### System Diagram
 
 ```mermaid
 graph TB
