@@ -1,3 +1,5 @@
+![Project Banner](docs/readme-agent/banner.svg)
+
 ## Movio: Comprehensive Performance Analysis Platform
 
 A multi-component platform featuring a dashboard for visualization and backend modules for benchmarking, concurrency testing, and cost analysis.
@@ -33,121 +35,250 @@ The repository is logically separated into two main components:
 *   **`dashboard/`**: Contains the frontend assets, configuration, and logic for the user interface. The frontend uses Next.js and React.
 *   **`movio-indicvoice/`**: Houses the core backend logic, utilities, and specialized modules, including benchmarking, concurrency tools, and cost analysis scripts. This component is primarily written in Python.
 
-## Architecture
+## Setup Guide
 
-### System Diagram
+### Backend Setup
+
+```bash
+cd movio-indicvoice
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+copy .env.example .env   # Windows
+# cp .env.example .env     # Linux/macOS
+python -m server.main    # default port 8001
+```
+
+### Frontend Setup (Dashboard)
+
+```bash
+cd dashboard
+npm install
+npm run dev     # development
+npm run build && npm start   # production
+```
+
+Open `http://localhost:3000` (or the port shown in the terminal).
+
+### Configuration
+
+Copy environment templates before running:
+
+- `movio-indicvoice/.env.example` → copy to `.env` in the same directory
+
+Dashboard connects to the TTS server via `NEXT_PUBLIC_TTS_SERVER` (default `http://127.0.0.1:8001`).
+
+### Running the Application
+
+1. **Start the backend** (TTS server on port `8001`)
+2. **Start the dashboard** (`npm run dev` in `dashboard/`)
+3. Open the dashboard and verify engine status shows **online**
+
+```bash
+# Terminal 1 — Backend
+cd movio-indicvoice && python -m server.main
+
+# Terminal 2 — Frontend
+cd dashboard && npm run dev
+```
+
+## System Architecture
+
+High-level system design, data flows, API map, and workflow pipelines derived from the repository structure.
+
+### System Architecture
 
 ```mermaid
 graph TB
-    n0["dashboard<br/>.gitignore, AGENTS.md, CLAUDE.md, README.md, ..."]
-    n1["movio-indicvoice<br/>.env.example, .gitignore, README.md, benchmark, ..."]
-    n0 --> n1
+    subgraph Client["Client Layer"]
+        user["User / Operator"]
+    end
+
+    subgraph Frontend["dashboard/ — Next.js + React + TypeScript"]
+        pages["App Router Pages<br/>Studio · Benchmark · Evaluation · Settings"]
+        components["UI Components<br/>Charts · KPI Cards · Shell Layout"]
+        lib["API Client lib/<br/>fetchOverview · studio · normalize"]
+    end
+
+    subgraph Backend["movio-indicvoice/ — Python TTS Runtime"]
+        api["FastAPI Server<br/>server/ · port 8001"]
+        benchmark["benchmark/"]
+        concurrency["concurrency/"]
+        cost_analysis["cost_analysis/"]
+        data_generation["data_generation/"]
+        benchmark --> concurrency --> cost_analysis --> data_generation
+        demo["demo/"]
+        evaluation["evaluation/"]
+        normalization["normalization/"]
+        optimization["optimization/"]
+        demo --> evaluation --> normalization --> optimization
+        phone_test["phone_test/"]
+        reference_voices["reference_voices/"]
+        report["report/"]
+        scripts["scripts/"]
+        phone_test --> reference_voices --> report --> scripts
+    end
+
+    subgraph Data["Data & Artifacts"]
+        bench_data["benchmark/data/<br/>JSON sentence corpora"]
+        bench_results["benchmark/results/<br/>summary.json · metrics"]
+        env_cfg[".env.example · config.py"]
+    end
+
+    subgraph Charts["Dashboard Chart Feeds"]
+        activity_7d["7-day activity chart"]
+        language_mix["Language mix chart"]
+        voice_usage["Voice usage chart"]
+        ttfa_distribution["TTFA distribution"]
+        trend_by_voice["Voice trend chart"]
+        trend_by_lang["Language trend chart"]
+    end
+
+    user --> pages
+    pages --> components
+    components --> lib
+    lib -->|REST JSON| api
+    api --> bench_data
+    api --> bench_results
+    api --> benchmark & concurrency & cost_analysis & data_generation
+    api -->|/dashboard/overview| Charts
+    components --> Charts
 ```
 
-### Workflow
+### Data Flow & Charts Pipeline
 
 ```mermaid
 flowchart LR
-    s0["Benchmark"]
-    s1["Cost Analysis"]
-    s0 --> s1
-    s2["Data Generation"]
-    s1 --> s2
-    s3["Dashboard"]
-    s2 --> s3
+    U["User"] --> UI["Dashboard UI"]
+    UI --> API["TTS Server API<br/>:8001"]
+
+    subgraph Ingest["Input Pipeline"]
+        text["Text / Scenario Input"]
+        norm["Normalizer Rules"]
+        synth["TTS Synthesis"]
+    end
+
+    subgraph Metrics["Metrics Collection"]
+        ttfa["TTFA ms"]
+        p99["p99 Latency"]
+        wer["WER / MOS"]
+        cost["Cost Analysis"]
+    end
+
+    subgraph Viz["Dashboard Charts"]
+        activity_7d["7-day activity chart"]
+        language_mix["Language mix chart"]
+        voice_usage["Voice usage chart"]
+        ttfa_distribution["TTFA distribution"]
+        trend_by_voice["Voice trend chart"]
+        trend_by_lang["Language trend chart"]
+        heatmap["Usage heatmap"]
+        funnel["Studio funnel chart"]
+    end
+
+    UI --> text
+    text --> norm
+    norm --> synth
+    synth --> API
+    API --> ttfa
+    API --> p99
+    API --> wer
+    API --> cost
+    ttfa --> activity_7d
+    p99 --> ttfa_distribution
+    wer --> evaluation
+    cost --> funnel
+    API -->|/dashboard/overview| Viz
+    Viz --> UI
 ```
 
-## Configuration
+### Component & API Map
 
-Configuration for the project can be managed through the following files:
+```mermaid
+graph LR
+    subgraph Dashboard["Dashboard Pages"]
+        home["/ — Overview KPIs"]
+        studio["/studio — TTS Studio"]
+        bench["/benchmark — Latency"]
+        eval["/evaluation — Quality"]
+    end
 
-*   `dashboard/tsconfig.json`
-*   `movio-indicvoice/.env.example`
+    subgraph API["Verified API Endpoints"]
+        ep0["/dashboard/overview<br/>KPIs + charts bundle"]
+        ep1["/studio/voices<br/>Voice catalog"]
+        ep2["/studio/normalize<br/>Text normalization"]
+        ep3["/tts<br/>Speech synthesis"]
+        ep4["/studio/scenarios<br/>Scenario packs"]
+    end
 
-## Application Pages
+    home --> ep0
+    studio --> ep1
+    studio --> ep2
+    studio --> ep3
+    studio --> ep4
+    bench --> ep0
+    eval --> ep0
+```
 
-Screenshots captured from the running application. Each page is listed with its function.
+### Benchmark Workflow Pipeline
 
-#### Home
+```mermaid
+flowchart TB
+    subgraph Input["Benchmark Inputs"]
+        offline["offline_sentences.json"]
+        taxi["taxi_driver_sentences.json"]
+        tanglish["tanglish_gold_pairs.json"]
+    end
 
-Application page at `/`
+    subgraph Runners["Benchmark Runners"]
+        r0["benchmark"]
+        r1["bug_hunt_benchmark"]
+        r2["cache_benchmark"]
+        r3["phone_cache_sim"]
+        r4["translation_benchmark"]
+    end
 
-![Home](docs/readme-agent/pages/dashboard.png)
+    subgraph Output["Results & Charts"]
+        summary["summary.json"]
+        metrics["metrics.py aggregates"]
+        compare["Backend comparison table"]
+        chart_p99["p99 TTFA chart"]
+        chart_cost["Cost chart"]
+    end
 
-#### Studio
+    offline --> r0
+    taxi --> r0
+    tanglish --> r0
+    r0 --> summary
+    summary --> metrics
+    metrics --> compare
+    compare --> chart_p99
+    compare --> chart_cost
+    chart_p99 --> dash["Dashboard /benchmark page"]
+```
 
-Application page at `/studio`
+### Dashboard Page Map
 
-![Studio](docs/readme-agent/pages/studio.png)
-
-#### Text Normalizer
-
-Context-aware taxi-domain normalization — booking IDs, OTPs, phones, times, currency and Tanglish.
-
-![Text Normalizer](docs/readme-agent/pages/normalizer.png)
-
-#### Batch Synthesis
-
-Bulk generation for scripts and contact-center scenario packs. Each item uses the studio /tts path.
-
-![Batch Synthesis](docs/readme-agent/pages/batch.png)
-
-#### Comparison Lab
-
-A/B voice comparison for the same utterance — measure TTFA and listen side by side.
-
-![Comparison Lab](docs/readme-agent/pages/comparison.png)
-
-#### Pronunciation
-
-Custom overrides for place names, brands and domain terms — layered on the base lexicon.
-
-![Pronunciation](docs/readme-agent/pages/pronunciation.png)
-
-#### Scenarios
-
-Taxi contact-center use cases from the Movio acceptance suite — open any card in TTS Studio.
-
-![Scenarios](docs/readme-agent/pages/scenarios.png)
-
-#### Two-Phone Test
-
-Scan QR codes with two phones on the same Wi-Fi — STT → translate → TTS through this laptop.
-
-![Two-Phone Test](docs/readme-agent/pages/phones.png)
-
-#### Live Voice Agent
-
-Multi-turn taxi contact-center flows — click an agent bubble to synthesize and play speech.
-
-![Live Voice Agent](docs/readme-agent/pages/agent.png)
-
-#### Benchmark
-
-Latency & cost snapshots from on-disk benchmark runs plus live p99.
-
-![Benchmark](docs/readme-agent/pages/benchmark.png)
-
-#### Evaluation
-
-Quality metrics from acceptance tests, WER/CER, and MOS scoring artifacts.
-
-![Evaluation](docs/readme-agent/pages/evaluation.png)
-
-#### Architecture
-
-System design for the self-hosted Movio Indic voice stack.
-
-![Architecture](docs/readme-agent/pages/architecture.png)
-
-#### Demo
-
-Application page at `/demo`
-
-![Demo](docs/readme-agent/pages/demo.png)
-
-#### Settings
-
-Runtime defaults from the TTS server health endpoint.
-
-![Settings](docs/readme-agent/pages/settings.png)
+```mermaid
+mindmap
+  root((MOVIO Dashboard))
+    Overview
+      home
+    Build
+      studio
+      normalizer
+      batch
+      comparison
+      pronunciation
+      scenarios
+    Evaluate
+      phones
+      agent
+      benchmark
+      evaluation
+      architecture
+    System
+      settings
+      demo
+```
