@@ -1,6 +1,10 @@
-## MOVIO
+## MOVIO: Comprehensive Performance Analysis Platform
 
-MOVIO is a comprehensive project containing components for a dashboard and various modules designed for benchmarking, data generation, and cost analysis.
+A multi-component platform featuring a dashboard for visualization and backend modules for benchmarking, concurrency testing, and cost analysis.
+
+## Overview
+
+MOVIO is a comprehensive project designed for analyzing and managing performance metrics. It consists of two main parts: a frontend dashboard for visualizing results and a backend module (`movio-indicvoice/`) containing specialized tools for rigorous performance testing, data generation, and cost analysis.
 
 ## Features
 
@@ -21,13 +25,15 @@ MOVIO utilizes a modern, multi-language stack:
 *   JavaScript
 *   HTML
 *   CSS
+*   Next.js
+*   React
 
 ## Project Structure
 
 The repository is logically separated into two main components:
 
-*   **`dashboard/`**: Contains the frontend assets, configuration, and logic for the user interface.
-*   **`movio-indicvoice/`**: Houses the core backend logic, utilities, and specialized modules, including benchmarking, concurrency tools, and cost analysis scripts.
+*   **`dashboard/`**: Contains the frontend assets, configuration, and logic for the user interface. The frontend uses Next.js and React.
+*   **`movio-indicvoice/`**: Houses the core backend logic, utilities, and specialized modules, including benchmarking, concurrency tools, and cost analysis scripts. This component is primarily written in Python.
 
 ## Configuration
 
@@ -36,6 +42,32 @@ Configuration for the project can be managed through the following files:
 *   `dashboard/tsconfig.json`
 *   `movio-indicvoice/.env.example`
 
-## Getting Started
+## Architecture
 
-Installation and usage instructions are not available in the repository documentation.
+### Architecture
+
+```mermaid
+graph TB
+    n0["dashboard<br/>.gitignore, AGENTS.md, CLAUDE.md, README.md, ..."]
+    n1["movio-indicvoice<br/>.env.example, .gitignore, README.md, benchmark, ..."]
+    n0 --> n1
+```
+
+### Workflow
+
+```mermaid
+flowchart LR
+    s0["Benchmark"]
+    s1["Cost Analysis"]
+    s0 --> s1
+    s2["Data Generation"]
+    s1 --> s2
+    s3["Dashboard"]
+    s2 --> s3
+```
+
+## Live Preview
+
+![Application screenshot](docs/readme-agent/screenshot.png)
+
+_Captured from running dev server at http://127.0.0.1:3456_
