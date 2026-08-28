@@ -64,14 +64,90 @@ Configuration for the project can be managed through the following files:
 *   `dashboard/tsconfig.json`
 *   `movio-indicvoice/.env.example`
 
-## Live Preview
+## Application Pages
 
-![Application screenshot](docs/readme-agent/screenshot.png)
+Screenshots captured from the running application. Each page is listed with its function.
 
-_Captured from running dev server at http://127.0.0.1:3456_
+#### Home
 
-## Live Preview
+Application page at `/`
 
-![Application screenshot](docs/readme-agent/screenshot.png)
+![Home](docs/readme-agent/pages/dashboard.png)
 
-_Captured from running dev server at http://localhost:3456_
+#### Studio
+
+Application page at `/studio`
+
+![Studio](docs/readme-agent/pages/studio.png)
+
+#### Text Normalizer
+
+Context-aware taxi-domain normalization — booking IDs, OTPs, phones, times, currency and Tanglish.
+
+![Text Normalizer](docs/readme-agent/pages/normalizer.png)
+
+#### Batch Synthesis
+
+Bulk generation for scripts and contact-center scenario packs. Each item uses the studio /tts path.
+
+![Batch Synthesis](docs/readme-agent/pages/batch.png)
+
+#### Comparison Lab
+
+A/B voice comparison for the same utterance — measure TTFA and listen side by side.
+
+![Comparison Lab](docs/readme-agent/pages/comparison.png)
+
+#### Pronunciation
+
+Custom overrides for place names, brands and domain terms — layered on the base lexicon.
+
+![Pronunciation](docs/readme-agent/pages/pronunciation.png)
+
+#### Scenarios
+
+Taxi contact-center use cases from the Movio acceptance suite — open any card in TTS Studio.
+
+![Scenarios](docs/readme-agent/pages/scenarios.png)
+
+#### Two-Phone Test
+
+Scan QR codes with two phones on the same Wi-Fi — STT → translate → TTS through this laptop.
+
+![Two-Phone Test](docs/readme-agent/pages/phones.png)
+
+#### Live Voice Agent
+
+Multi-turn taxi contact-center flows — click an agent bubble to synthesize and play speech.
+
+![Live Voice Agent](docs/readme-agent/pages/agent.png)
+
+#### Benchmark
+
+Latency & cost snapshots from on-disk benchmark runs plus live p99.
+
+![Benchmark](docs/readme-agent/pages/benchmark.png)
+
+#### Evaluation
+
+Quality metrics from acceptance tests, WER/CER, and MOS scoring artifacts.
+
+![Evaluation](docs/readme-agent/pages/evaluation.png)
+
+#### Architecture
+
+System design for the self-hosted Movio Indic voice stack.
+
+![Architecture](docs/readme-agent/pages/architecture.png)
+
+#### Demo
+
+Application page at `/demo`
+
+![Demo](docs/readme-agent/pages/demo.png)
+
+#### Settings
+
+Runtime defaults from the TTS server health endpoint.
+
+![Settings](docs/readme-agent/pages/settings.png)
