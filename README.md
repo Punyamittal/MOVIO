@@ -1,134 +1,139 @@
 ![Project Banner](docs/readme-agent/banner.svg)
 
-# MOVIO System Documentation
+# 🎙️ Movio TTS Synthesis Platform
 
-## 🚀 Overview
+This repository provides a full-stack, high-performance platform for Text-to-Speech (TTS) synthesis and comprehensive audio quality benchmarking. The system is designed for low-latency, high-fidelity voice generation, supporting advanced features like speaker embedding and real-time performance monitoring.
 
-MOVIO is a comprehensive, three-tiered AI platform designed for advanced Text-to-Speech (TTS) synthesis, voice cloning, and rigorous performance benchmarking. The system provides end-to-end capabilities, from raw data ingestion and model training to real-time API deployment and detailed performance metric calculation.
+## 🚀 Architecture Overview
 
-### Key Features
-*   **Advanced TTS Synthesis:** High-fidelity voice generation with customizable parameters.
-*   **Voice Cloning:** Ability to synthesize speech using provided voice samples.
-*   **Performance Benchmarking:** Automated evaluation of model quality using industry-standard metrics (e.g., WER, TTFA).
-*   **Scalable Architecture:** Built on a microservices approach (Frontend/Backend/Core AI) for robust deployment.
+The platform is structured into three interconnected services, ensuring scalability and separation of concerns:
 
-## 🏗️ System Architecture
+1.  **Frontend (Client UI):** Built with React/Next.js. Handles user interaction, state management, and displaying synthesis results and benchmark metrics.
+2.  **Backend (API Gateway):** Built with FastAPI/Python. Acts as the primary orchestration layer, validating incoming requests, managing session state, and routing requests to the Core AI service.
+3.  **Core AI Engine (Inference):** Built with PyTorch and optimized for CUDA. This is the computational heart of the system, responsible for feature extraction, TTS synthesis, and running complex benchmarking models.
 
-The MOVIO platform operates on a three-tier architecture, ensuring separation of concerns and scalability.
+## ⚙️ Core Workflows
 
-### 1. Client/Frontend (React/NPM)
-*   **Role:** Provides the user interface for interacting with the system. It handles user input, displays results, and manages the overall workflow state.
-*   **Technology:** React.js.
-*   **Interaction:** Communicates exclusively with the Backend API.
+### 1. Text-to-Speech Synthesis
 
-### 2. Backend (Python/FastAPI)
-*   **Role:** Acts as the primary API gateway and orchestration layer. It receives requests from the Frontend, validates inputs, manages session state, and calls the appropriate services within the Core AI layer.
-*   **Technology:** Python, FastAPI.
-*   **Interaction:** Coordinates data flow between the Frontend and the Core AI Services.
+1.  The user inputs text and parameters via the **Frontend**.
+2.  The **Frontend** sends the request to the **Backend** API Gateway.
+3.  The **Backend** validates the request and passes it to the **Core AI Engine**.
+4.  The **Core AI Engine** performs the TTS synthesis (e.g., using the IndicVoice model) and returns the raw audio data (or a stream).
+5.  The **Backend** streams the audio data back to the **Frontend** for playback.
 
-### 3. Core AI Services (PyTorch/CUDA)
-*   **Role:** Contains the heavy computational lifting. This layer houses the specialized models for TTS synthesis, voice feature extraction, and the benchmarking logic.
-*   **Technology:** PyTorch, CUDA (GPU acceleration is mandatory for optimal performance).
-*   **Components:**
-    *   **TTS Engine:** Handles the actual audio generation.
-    *   **Feature Extractor:** Processes raw audio/text into usable model inputs.
-    *   **Benchmarking Module:** Executes evaluation scripts and calculates metrics.
+### 2. Audio Benchmarking
 
-## ⚙️ Core Functionality & Pipelines
+This workflow allows users to upload audio samples for quality assessment.
 
-### 🎙️ Text-to-Speech (TTS) Synthesis Pipeline
+1.  The user uploads audio files via the **Frontend**.
+2.  The **Backend** receives the files and passes them to the **Core AI Engine**.
+3.  The **Core AI Engine** runs various quality metrics (e.g., WER, MOS prediction) and calculates performance statistics.
+4.  The **Backend** returns the calculated metrics and reports to the **Frontend**.
 
-1.  **Input:** User provides text and optional voice profile ID (or sample audio for cloning).
-2.  **Preprocessing:** The Backend sends the request to the Core AI. The Feature Extractor normalizes the text and extracts necessary voice embeddings.
-3.  **Synthesis:** The TTS Engine generates the raw audio waveform.
-4.  **Output:** The synthesized audio is streamed back through the Backend to the Frontend for playback and download.
+## 🛠️ Setup and Installation Guide
 
-### 📊 Benchmarking and Evaluation Pipeline
+**Prerequisites:**
+*   Python 3.8+ (Recommended)
+*   Node.js and npm
+*   NVIDIA CUDA Toolkit (Crucial for the Core AI Engine)
 
-This pipeline is used to measure the quality and efficiency of the synthesized audio against ground truth data.
+### Step 1: Environment Setup
 
-1.  **Data Ingestion:** Evaluation data (text transcripts and reference audio) are uploaded to the system.
-2.  **Execution:** The Benchmarking Module runs comparison algorithms against the generated audio.
-3.  **Metrics Calculation:** Key performance indicators (KPIs) are calculated.
-4.  **Visualization:** Results are displayed on the Frontend, providing a clear assessment of model performance.
-
-## 💻 Technical Setup and Installation
-
-**⚠️ Prerequisites:**
-*   Python 3.8+ (Required for Backend and Core AI).
-*   Node.js and NPM (Required for Frontend).
-*   **CUDA Toolkit:** Installation of the correct CUDA version is mandatory for the Core AI services to run efficiently.
-
-### 1. Backend Setup (Python)
+It is highly recommended to use a virtual environment for dependency management.
 
 ```bash
-# Clone the repository
+# Clone the repository (assuming the structure is local)
 git clone <repository-url>
-cd movio-backend
+cd <repository-name>
 
-# Install dependencies
-pip install -r requirements.txt
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Linux/macOS
+# venv\Scripts\activate  # On Windows
 ```
 
-### 2. Core AI Setup (PyTorch/CUDA)
+### Step 2: Install Dependencies
+
+Install dependencies for each component:
+
+**A. Core AI Engine (PyTorch/CUDA)**
+
+*Note: Ensure your CUDA version matches the required PyTorch installation.*
 
 ```bash
-# Navigate to the core AI directory
-cd movio-core-ai
-
-# Install PyTorch with CUDA support (Example command)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-
-# Run the setup script
-python setup.py install
+# Install core dependencies
+pip install -r core_ai/requirements.txt
 ```
 
-### 3. Frontend Setup (React/NPM)
+**B. Backend (FastAPI)**
 
 ```bash
-# Navigate to the frontend directory
-cd movio-frontend
+pip install -r backend/requirements.txt
+```
 
-# Install dependencies
+**C. Frontend (React/Next.js)**
+
+```bash
+# Install frontend dependencies
+cd frontend
 npm install
+cd ..
 ```
 
-## 🚀 Running the System
+## ▶️ Running the Application
 
-**IMPORTANT:** The system must be run in a specific order, utilizing separate terminals for each service.
+Due to the multi-service architecture, the application must be run in three separate terminals.
 
-1.  **Start Core AI Services:** (Terminal 1)
-    ```bash
-    python movio-core-ai/run_server.py
-    ```
-2.  **Start Backend API:** (Terminal 2)
-    ```bash
-    uvicorn movio-backend.main:app --reload
-    ```
-3.  **Start Frontend Client:** (Terminal 3)
-    ```bash
-    npm run dev
-    ```
+### Terminal 1: Core AI Engine (Inference)
 
-## 🌐 API Endpoints Summary
+This service must be running first as it provides the core functionality.
 
-The Backend exposes several key endpoints for managing the system lifecycle:
+```bash
+# Ensure virtual environment is active
+python core_ai/main.py
+```
+
+### Terminal 2: Backend (API Gateway)
+
+This service connects the frontend to the core AI engine.
+
+```bash
+# Ensure virtual environment is active
+uvicorn backend.main:app --reload
+```
+
+### Terminal 3: Frontend (Client UI)
+
+This starts the user interface.
+
+```bash
+# Ensure you are in the 'frontend' directory
+npm run dev
+```
+
+## 🌐 API Endpoints and Functionality
+
+### Backend API Endpoints (FastAPI)
 
 | Endpoint | Method | Description | Usage | 
 | :--- | :--- | :--- | :--- |
-| `/api/v1/tts/synthesize` | POST | Generates audio from text and voice profile. | Requires `text` and `voice_id` in body. |
-| `/api/v1/benchmark/upload` | POST | Uploads evaluation data (text/audio pairs). | Used to initiate benchmarking runs. |
-| `/api/v1/benchmark/results` | GET | Retrieves calculated performance metrics. | Requires `run_id` parameter. |
-| `/api/v1/status` | GET | Checks the operational status of the core services. | Useful for health checks. |
+| `/api/tts/synthesize` | POST | Performs TTS synthesis based on text and speaker ID. | Requires `text` and `speaker_id` in body. | 
+| `/api/benchmark/upload` | POST | Accepts audio files for quality benchmarking. | Accepts file upload and metadata. | 
 
-## 📈 Performance Metrics
+### Core AI Engine Functionality
 
-The system tracks several critical metrics to quantify performance and cost:
+*   **TTS Synthesis:** Supports high-quality, low-latency voice generation.
+*   **Benchmarking:** Calculates metrics such as Word Error Rate (WER) and Mean Opinion Score (MOS) prediction.
+*   **Performance:** Optimized for CUDA acceleration, achieving low latency (e.g., P99 latency metrics are tracked).
 
-*   **Word Error Rate (WER):** Measures the difference between synthesized and reference text.
-*   **Time To First Audio (TTFA):** Measures the latency from request submission to first audio byte received.
-*   **P99 Latency:** The 99th percentile latency, indicating the experience of the slowest 1% of users.
-*   **Operational Cost:** Tracks the estimated computational cost per 1000 characters synthesized.
+## 📊 Key Performance Metrics
+
+The system tracks and reports several critical metrics for quality assurance:
+
+*   **Word Error Rate (WER):** Measures the accuracy of transcribed text against the source text.
+*   **Mean Opinion Score (MOS):** A predicted score indicating the perceived quality of the synthesized speech (1-5 scale).
+*   **Latency:** Measures the time taken for synthesis, with specific tracking for P99 performance.
 
 ## Setup Guide
 
