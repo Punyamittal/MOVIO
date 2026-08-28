@@ -1,54 +1,51 @@
 ![Project Banner](docs/readme-agent/banner.svg)
 
-## Movio: Comprehensive Performance Analysis Platform
-
-A multi-component platform featuring a dashboard for visualization and backend modules for benchmarking, concurrency testing, and cost analysis.
-
-## Overview
-
-MOVIO is a comprehensive project designed for analyzing and managing performance metrics. It consists of two main parts: a frontend dashboard for visualizing results and a backend module (`movio-indicvoice/`) containing specialized tools for rigorous performance testing, data generation, and cost analysis.
-
-## Features
-
-MOVIO provides a suite of tools to analyze and manage performance metrics, including:
-
-*   **Dashboard Interface:** A dedicated frontend for visualizing results and interacting with the system (`dashboard/`).
-*   **Benchmarking Capabilities:** Tools for rigorous performance testing across various scenarios (`movio-indicvoice/benchmark/`).
-*   **Concurrency and Load Testing:** Modules for simulating high-load environments and monitoring resources (`movio-indicvoice/concurrency/`).
-*   **Data Generation Utilities:** Tools to create synthetic data for testing and analysis (`movio-indicvoice/data_generation/`).
-*   **Cost Analysis:** Calculation modules to estimate and analyze operational costs (`movio-indicvoice/cost_analysis/`).
-
-## Tech Stack
-
-MOVIO utilizes a modern, multi-language stack:
-
-*   Python
-*   TypeScript
-*   JavaScript
-*   HTML
-*   CSS
-
-## Project Structure
-
-The repository is logically separated into two main components:
-
-*   **`dashboard/`**: Contains the frontend assets, configuration, and logic for the user interface. The frontend uses Next.js and React.
-*   **`movio-indicvoice/`**: Houses the core backend logic, utilities, and specialized modules, including benchmarking, concurrency tools, and cost analysis scripts. This component is primarily written in Python.
-
 ## Setup Guide
 
 ### Backend Setup
 
+_From `movio-indicvoice/README.md`:_
+
+
 ```bash
 cd movio-indicvoice
 python -m venv .venv
-# Windows: .venv\Scripts\activate
-# Linux/macOS: source .venv/bin/activate
+
+# Windows
+.venv\Scripts\activate
+# Linux/macOS
+# source .venv/bin/activate
+
 pip install -r requirements.txt
-copy .env.example .env   # Windows
-# cp .env.example .env     # Linux/macOS
-python -m server.main    # default port 8001
-```
+# On some Linux/PEP-668 systems:
+#   pip install --break-system-packages -r requirements.txt
+
+# CRITICAL for <500ms-class TTFA: install CUDA PyTorch (Windows pip defaults to CPU).
+# Your machine has an NVIDIA GPU but `pip install torch` often installs `+cpu`.
+# RTX 40-series example (CUDA 12.6 wheels):
+pip uninstall -y torch
+pip install torch --index-url https://download.pytorch.org/whl/cu126
+# Confirm: python -c "import torch; print(torch.cuda.is_available(), torch.__version__)"
+# Expect: True 2.x.x+cu126
+
+# Optional local TTS (IndicF5) — gated HF model
+pip install git+https://github.com/ai4bharat/IndicF5.git
+
+# Ollama LLM (local, no API key)
+# Install Ollama, then:
+ollama pull gemma4:31b
+# Drop-in alternative (same env var) — often more reliable under RAM pressure:
+#   ollama pull gemma4:26b
+#   set OLLAMA_MODEL=gemma4:26b
+# For faster local generation on a laptop, `gemma4:latest` also works via OLLAMA_MODEL.
+
+# Hugging Face gated model (IndicF5) — optional quality path
+# Without access the F5 backend uses silent mock WAV; edge_fast still works online.
+# 1. Create a HF account and request access:
+#      https://huggingface.co/ai4bharat/IndicF5
+# 2. Then in the venv:
+#      pip install huggingface_hub
+#      huggingface-cli login
 
 ### Frontend Setup (Dashboard)
 
