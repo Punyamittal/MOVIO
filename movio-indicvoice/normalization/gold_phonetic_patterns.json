@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "note": "High-priority speak-as overrides mined from gold Tanglish register.",
+  "tokens": [
+    {"token": "anna", "phonetic": "annuh", "compact_phonetic": "annuh", "hyphenated": "ann-uh", "gloss": "brother (respectful, elder)", "note": "Taxi address; speak ANN-uh not English name AH-na"},
+    {"token": "saar", "phonetic": "saar", "compact_phonetic": "saar", "hyphenated": "saar", "gloss": "sir", "note": "Most common respectful address in TN"},
+    {"token": "sir", "phonetic": "sir", "compact_phonetic": "sir", "hyphenated": "sir", "gloss": "sir", "note": "English loanword; interchangeable with saar"},
+    {"token": "thambi", "phonetic": "thambi", "compact_phonetic": "thambi", "hyphenated": "tham-bi", "gloss": "brother (younger)", "note": "Driver to young male passenger"},
+    {"token": "bro", "phonetic": "bro", "compact_phonetic": "bro", "hyphenated": "bro", "gloss": "brother (casual loanword)", "note": "Peers; less common driver-passenger"},
+    {"token": "akka", "phonetic": "ak-kah", "compact_phonetic": "akkah", "hyphenated": "ak-kah"},
+    {"token": "driver", "phonetic": "dryvur", "compact_phonetic": "dryvur", "hyphenated": "dry-vur"},
+    {"token": "pannunga", "phonetic": "pannunga", "compact_phonetic": "pannunga", "hyphenated": "pan-nun-ga"},
+    {"token": "sollunga", "phonetic": "sollunga", "compact_phonetic": "sollunga", "hyphenated": "sol-lun-ga"},
+    {"token": "irukku", "phonetic": "irukku", "compact_phonetic": "irukku", "hyphenated": "i-ruk-ku"},
+    {"token": "iruken", "phonetic": "iruken", "compact_phonetic": "iruken", "hyphenated": "i-ru-ken"},
+    {"token": "kitta", "phonetic": "kitta", "compact_phonetic": "kitta", "hyphenated": "kit-ta"},
+    {"token": "pakkathula", "phonetic": "pakkathula", "compact_phonetic": "pakkathula", "hyphenated": "pa-ka-thu-la"},
+    {"token": "vandhuduchu", "phonetic": "vandhuduchu", "compact_phonetic": "vandhuduchu", "hyphenated": "van-thu-du-chu"},
+    {"token": "mudiyathu", "phonetic": "mudiyathu", "compact_phonetic": "mudiyathu", "hyphenated": "mu-di-ya-thu"},
+    {"token": "konjam", "phonetic": "konjam", "compact_phonetic": "konjam", "hyphenated": "kon-jam"},
+    {"token": "neram", "phonetic": "neram", "compact_phonetic": "neram", "hyphenated": "ne-ram"},
+    {"token": "nimisham", "phonetic": "nimisham", "compact_phonetic": "nimisham", "hyphenated": "ni-mi-sham"}
+  ],
+  "suffix_patterns": [
+    {"pattern": "-ku vandhuduchu", "phonetic": "-ku van-thu-du-chu", "compact_phonetic": "-ku vandhuduchu"},
+    {"pattern": "nu sollunga", "phonetic": "nu sol-lun-ga", "compact_phonetic": "nu sollunga"},
+    {"pattern": "pannunga sollunga", "phonetic": "pan-nun-ga sol-lun-ga", "compact_phonetic": "pannunga sollunga"},
+    {"pattern": "thappa iruku", "phonetic": "thap-pa i-ru-ku", "compact_phonetic": "thappa irukku"},
+    {"pattern": "driver-kitta sollunga", "phonetic": "dry-vur kit-ta sol-lun-ga", "compact_phonetic": "dryvur kitta sollunga"}
+  ]
+}

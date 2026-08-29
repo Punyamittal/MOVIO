@@ -1,28 +1,16 @@
 """
-Tanglish LLM layer (prompt-based, no fine-tuning).
+Tanglish LLM normalization layer (prompt-based, no fine-tuning).
 
-============================================================================
-DESIGN PRINCIPLE — NATURAL SPOKEN TANGLISH, NOT TAMIL TRANSLATION
-============================================================================
-Terms in preserve_english_list.json must NEVER be converted to Tamil script
-regardless of context. The goal is natural spoken Tanglish for a Chennai taxi
-voice-agent, preserving English loanwords in Latin script inline.
+Runs AFTER deterministic_normalizer and pronunciation_lexicon lookup on text
+that is already Tanglish but may be malformed (mixed script, wrong suffixes,
+English clause collapse, etc.).
 
-Example:
-  Input:  "Unga driver 5 minutes la vandhuruvaanga"
-  GOOD:   "உங்க driver 5 minutes ல வந்துருவாங்க"
-  BAD:    "உங்க டிரைவர் ஐந்து நிமிடத்தில் வந்துவிடுவார்கள்"
-          (fully Tamil-script literary translation)
+The canonical grammar contract lives in tanglish_normalize_spec.py. Rule-based
+repair in tanglish_style_normalizer + translation_validator implements the same
+rules without calling the LLM (faster, deterministic).
 
-This layer runs AFTER deterministic_normalizer and pronunciation_lexicon lookup.
-It only handles what those two could not resolve.
-
-FUTURE QLoRA HOOK (not implemented):
-  If validator_flags.log shows consistent Tanglish error classes (over-translation
-  of loanwords, bad code-mix, etc.), a future QLoRA fine-tune of a small adapter
-  on flagged (input, corrected_output) pairs could be inserted HERE — replacing
-  or wrapping call_ollama_tanglish(). Do NOT train in this repo; prompt-only.
-============================================================================
+FUTURE QLoRA HOOK: replace call_ollama_tanglish() if validator_flags.log shows
+consistent error classes.
 """
 from __future__ import annotations
 
@@ -43,6 +31,12 @@ from config import (  # noqa: E402
     PRESERVE_ENGLISH_LIST_PATH,
     TRANSLATOR_OLLAMA_ENABLED,
 )
+from normalization.tanglish_normalize_spec import (  # noqa: E402
+    build_normalize_messages,
+    enforce_roman_script,
+    parse_normalize_output,
+)
+from normalization.tanglish_style_normalizer import polish_tanglish_output  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("normalization.tanglish_llm")
@@ -56,38 +50,23 @@ def load_preserve_list(path: Path = PRESERVE_ENGLISH_LIST_PATH) -> list[str]:
     return [str(x).strip() for x in data if str(x).strip()]
 
 
-def build_tanglish_prompt(text: str, preserve: list[str]) -> str:
-    preserve_csv = ", ".join(preserve)
-    return (
-        "You normalize text for a Chennai taxi TTS voice agent.\n"
-        "Output NATURAL SPOKEN TANGLISH — do NOT produce pure Tamil literary "
-        "translation and do NOT force pure English.\n"
-        f"NEVER convert these English loanwords to Tamil script: {preserve_csv}.\n"
-        "Keep them in Latin script inline. You may add Tamil particles/suffixes "
-        "around them (e.g. 'driver', 'OTP', 'cab', 'traffic').\n"
-        "Do not invent new facts. Return ONLY the normalized sentence text, "
-        "no quotes, no markdown.\n\n"
-        f"Input: {text}\n"
-        "Output:"
-    )
+def postprocess_normalize(raw: str, *, source: str = "") -> tuple[str, list[str]]:
+    """Apply spec output rules: parse flags, Roman-only, rule-based polish."""
+    text, flags = parse_normalize_output(raw)
+    text, script_flags = enforce_roman_script(text)
+    flags.extend(script_flags)
+    # Deterministic pass implements the same grammar contract without guessing.
+    if text and not any(f.startswith("normalize_flagged:") for f in flags):
+        text = polish_tanglish_output(text, source=source)
+    return text, flags
 
 
 def call_ollama_tanglish(text: str, preserve: list[str] | None = None) -> str:
     preserve = preserve if preserve is not None else load_preserve_list()
-    prompt = build_tanglish_prompt(text, preserve)
+    messages = build_normalize_messages(text, preserve)
     payload = {
         "model": OLLAMA_MODEL,
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "You are a Tanglish normalizer for taxi TTS. "
-                    "Preserve English loanwords in Latin script. "
-                    "Never fully translate to literary Tamil."
-                ),
-            },
-            {"role": "user", "content": prompt},
-        ],
+        "messages": messages,
         "stream": False,
     }
     last_err = None
@@ -97,8 +76,10 @@ def call_ollama_tanglish(text: str, preserve: list[str] | None = None) -> str:
             resp.raise_for_status()
             body = resp.json()
             message = body.get("message") or {}
-            out = (message.get("content") or body.get("response") or "").strip()
-            out = out.strip('"').strip("'").strip()
+            raw = (message.get("content") or body.get("response") or "").strip()
+            out, flags = postprocess_normalize(raw, source=text)
+            if flags:
+                logger.warning("Tanglish normalize flags: %s", flags)
             if out:
                 return out
             raise ValueError("empty LLM response")
@@ -106,15 +87,29 @@ def call_ollama_tanglish(text: str, preserve: list[str] | None = None) -> str:
             last_err = exc
             logger.warning("Tanglish LLM attempt %d failed: %s", attempt, exc)
     logger.error("Tanglish LLM failed after retries (%s) — returning deterministic text", last_err)
-    # Soft fallback: pass through so TTS still works without Ollama
-    return text
+    out, _ = postprocess_normalize(text, source=text)
+    return out
 
 
 def needs_tanglish_llm(text: str) -> bool:
-    """Heuristic: Tamil script mixed with Latin, or common Tanglish suffixes."""
+    """Heuristic: mixed script, known malformation markers, or Tanglish particles."""
     has_tamil = any("\u0b80" <= ch <= "\u0bff" for ch in text)
     has_latin = any("a" <= ch.lower() <= "z" for ch in text)
-    tanglish_markers = (" la ", " ah ", " nu ", "pannu", "irukku", "unga", "naan")
+    tanglish_markers = (
+        " la ",
+        " ah ",
+        " nu ",
+        "pannu",
+        "irukku",
+        "unga",
+        "naan",
+        "-ko ",
+        "-ko,",
+        " ku block",
+        " ponna",
+        " panna.",
+        " bad day irukku",
+    )
     lower = f" {text.lower()} "
     if any(m in lower for m in tanglish_markers):
         return True
@@ -122,19 +117,18 @@ def needs_tanglish_llm(text: str) -> bool:
 
 
 def apply_tanglish_layer(text: str, force: bool = False) -> str:
-    """Apply LLM Tanglish handling only when needed (or force=True).
-
-    Disabled unless TRANSLATOR_OLLAMA_ENABLED — offline rewrite already
-    produces speakable Tanglish; Ollama here routinely adds 3–20s to TTFA.
-    """
-    if not TRANSLATOR_OLLAMA_ENABLED:
-        return text
+    """Normalize malformed Tanglish via rules + optional LLM."""
     if not force and not needs_tanglish_llm(text):
-        logger.debug("Skipping Tanglish LLM for: %r", text)
-        return text
+        out, _ = postprocess_normalize(text, source=text)
+        return out
+    if not TRANSLATOR_OLLAMA_ENABLED:
+        out, flags = postprocess_normalize(text, source=text)
+        if flags:
+            logger.info("Tanglish LLM disabled; rule-only normalize flags=%s", flags)
+        return out
     return call_ollama_tanglish(text)
 
 
 if __name__ == "__main__":
-    sample = "Unga driver 5 minutes la vandhuruvaanga"
-    print(apply_tanglish_layer(sample, force=True))
+    sample = "andha street ippo procession ku block pannirukanga"
+    print(apply_tanglish_layer(sample, force=False))

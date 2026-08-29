@@ -30,7 +30,7 @@ export default function TwoPhoneTestPage() {
   return (
     <ShellFrame
       title="Two-Phone Test"
-      subtitle="Scan QR codes with two phones on the same Wi-Fi — STT → translate → TTS through this laptop."
+      subtitle="Half-duplex two-phone test: VAD → ASR → translate → partner TTS with echo suppression."
     >
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <a

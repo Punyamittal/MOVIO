@@ -551,26 +551,11 @@ def _norm_key(text: str) -> str:
     return t
 
 
-@lru_cache(maxsize=1)
-def _gold_lookup() -> dict[str, str]:
-    if not _GOLD_PATH.exists():
-        return {}
-    try:
-        rows = json.loads(_GOLD_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
-    out: dict[str, str] = {}
-    for row in rows:
-        en = (row.get("english") or "").strip()
-        ta = (row.get("tanglish") or "").strip()
-        if en and ta:
-            out[_norm_key(en)] = ta
-    return out
-
-
 def lookup_gold_tanglish(text: str) -> str | None:
     """Exact (normalized) English → natural Tanglish gold hit."""
-    return _gold_lookup().get(_norm_key(text))
+    from normalization.tanglish_translator import exact_gold
+
+    return exact_gold(text)
 
 
 def rewrite_en_to_tanglish(text: str) -> str:

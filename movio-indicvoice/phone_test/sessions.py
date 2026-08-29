@@ -7,6 +7,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
+from phone_test.fsm import ConversationController, ProcessingState
+
 Role = Literal["A", "B"]
 
 SESSION_TTL_SEC = 2 * 60 * 60  # 2 hours
@@ -30,34 +32,72 @@ class PhoneSide:
     input_lang: str = "en"
     output_lang: str = "tanglish"
     mic_active: bool = False
-    receiving: bool = False
+    receiving: bool = False  # True while TTS is playing on this phone (echo gate)
     last_seen: float = 0.0
+    echo_suppress: bool = False
 
 
 @dataclass
 class UtteranceEvent:
+    """Full utterance record for debugging half-duplex turns."""
+
+    utterance_id: str
+    speaker_id: Role
     direction: str  # "A→B" or "B→A"
-    source_text: str
-    translated_text: str
+    start_time: float
+    end_time: float
+    source_language: str
+    target_language: str
+    transcript: str
     normalized_text: str
-    latency_sec: float
-    stt_ms: float
-    translate_tts_ms: float
+    translation: str
+    processing_status: str
+    lang_confidence: float = 0.0
+    lang_uncertain: bool = False
+    translation_skipped: bool = False
+    interruption: bool = False
+    latency_sec: float = 0.0
+    stt_ms: float = 0.0
+    translate_tts_ms: float = 0.0
     stages: list[str] = field(default_factory=list)
     error: str | None = None
+    retry_count: int = 0
     ts: float = field(default_factory=time.time)
+
+    # Back-compat aliases used by older dashboard / simulate code
+    @property
+    def source_text(self) -> str:
+        return self.transcript
+
+    @property
+    def translated_text(self) -> str:
+        return self.translation
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "utterance_id": self.utterance_id,
+            "speaker_id": self.speaker_id,
             "direction": self.direction,
-            "source_text": self.source_text,
-            "translated_text": self.translated_text,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "source_language": self.source_language,
+            "target_language": self.target_language,
+            "transcript": self.transcript,
+            "source_text": self.transcript,
             "normalized_text": self.normalized_text,
+            "translation": self.translation,
+            "translated_text": self.translation,
+            "processing_status": self.processing_status,
+            "lang_confidence": self.lang_confidence,
+            "lang_uncertain": self.lang_uncertain,
+            "translation_skipped": self.translation_skipped,
+            "interruption": self.interruption,
             "latency_sec": round(self.latency_sec, 3),
             "stt_ms": round(self.stt_ms, 1),
             "translate_tts_ms": round(self.translate_tts_ms, 1),
             "stages": self.stages,
             "error": self.error,
+            "retry_count": self.retry_count,
             "ts": self.ts,
         }
 
@@ -78,6 +118,14 @@ class TestSession:
     avg_latency_ba: float = 0.0
     _lat_ab: list[float] = field(default_factory=list)
     _lat_ba: list[float] = field(default_factory=list)
+    conversation: ConversationController | None = None
+
+    def __post_init__(self) -> None:
+        if self.conversation is None:
+            self.conversation = ConversationController(session_id=self.id)
+            self.conversation.bind_logger(
+                lambda msg, **extra: self.log(msg, **extra)
+            )
 
     def phone(self, role: Role) -> PhoneSide:
         return self.phone_a if role == "A" else self.phone_b
@@ -117,10 +165,15 @@ class TestSession:
             self._lat_ba.append(ev.latency_sec)
             self.avg_latency_ba = sum(self._lat_ba) / len(self._lat_ba)
 
+    def find_utterance(self, utterance_id: str) -> UtteranceEvent | None:
+        for u in reversed(self.utterances):
+            if u.utterance_id == utterance_id:
+                return u
+        return None
+
     def public_state(self, host_base: str | None = None) -> dict[str, Any]:
         last_ab = next((u for u in reversed(self.utterances) if u.direction == "A→B"), None)
         last_ba = next((u for u in reversed(self.utterances) if u.direction == "B→A"), None)
-        # Tokens are intentional for local laptop dashboard QR rebuilds.
         urls: dict[str, str] = {}
         if host_base:
             base = host_base.rstrip("/")
@@ -128,6 +181,7 @@ class TestSession:
                 "A": f"{base}/test/{self.id}/A?token={self.token_a}",
                 "B": f"{base}/test/{self.id}/B?token={self.token_b}",
             }
+        fsm = self.conversation.snapshot() if self.conversation else {}
         return {
             "session_id": self.id,
             "created_at": self.created_at,
@@ -136,6 +190,8 @@ class TestSession:
             "token_a": self.token_a,
             "token_b": self.token_b,
             "urls": urls,
+            "fsm": fsm,
+            "fsm_state": fsm.get("fsm_state", ProcessingState.IDLE.value),
             "phone_a": {
                 "role": "A",
                 "connected": self.phone_a.connected,
@@ -143,6 +199,7 @@ class TestSession:
                 "output_lang": self.phone_a.output_lang,
                 "mic_active": self.phone_a.mic_active,
                 "receiving": self.phone_a.receiving,
+                "echo_suppress": self.phone_a.echo_suppress or fsm.get("echo_suppress_a", False),
             },
             "phone_b": {
                 "role": "B",
@@ -151,9 +208,11 @@ class TestSession:
                 "output_lang": self.phone_b.output_lang,
                 "mic_active": self.phone_b.mic_active,
                 "receiving": self.phone_b.receiving,
+                "echo_suppress": self.phone_b.echo_suppress or fsm.get("echo_suppress_b", False),
             },
             "last_ab": last_ab.to_dict() if last_ab else None,
             "last_ba": last_ba.to_dict() if last_ba else None,
+            "utterances": [u.to_dict() for u in self.utterances[-20:]],
             "avg_latency_ab": round(self.avg_latency_ab, 3),
             "avg_latency_ba": round(self.avg_latency_ba, 3),
             "event_log": self.event_log[-40:],
@@ -192,6 +251,7 @@ class SessionStore:
             debug=debug,
         )
         session.log("SESSION CREATED")
+        session.conversation.transition(ProcessingState.IDLE, "session_created")
         self._sessions[sid] = session
         self.active_id = sid
         self._purge_expired()

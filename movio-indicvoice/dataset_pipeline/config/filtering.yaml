@@ -1,0 +1,31 @@
+# Quality / filtering thresholds
+reject:
+  min_rms: 200
+  max_clipping_ratio: 0.02
+  min_duration_sec: 0.8
+  max_duration_sec: 25.0
+  min_stt_confidence: 0.35
+  non_target_languages: ["other"]
+
+review:
+  # Uncertain samples are kept for human review (never silently discarded)
+  stt_confidence_below: 0.7
+  quality_score_below: 0.75
+  code_switch_always_review: false
+
+accept:
+  min_stt_confidence: 0.75
+  min_quality_score: 0.8
+  require_usable_for_training: true
+
+noise_levels:
+  low_rms_above: 1500
+  medium_rms_above: 600
+
+difficulty:
+  hard_if_code_switch: true
+  hard_if_has_otp_or_plate: true
+  hard_if_duration_above: 12.0
+  hard_if_entity_count_above: 3
+  easy_if_duration_below: 3.0
+  easy_if_token_count_below: 6

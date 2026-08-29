@@ -7,6 +7,8 @@ Stateless English → Tanglish translation.
             ↓
           model
             ↓
+    gold-style polish            (tanglish_style_normalizer — calques, time words)
+            ↓
        validation                 (translation_validator)
             ↓  fail
        stricter retry             (bounded, still from the ORIGINAL source)
@@ -30,6 +32,7 @@ target-language content words.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import re
@@ -65,17 +68,22 @@ from config import (  # noqa: E402
     TANGLISH_TOP_P,
     TRANSLATION_DEBUG_LOG,
 )
+from normalization.tanglish_normalize_spec import NATURAL_SPOKEN_GUIDELINES  # noqa: E402
+from normalization.tanglish_style_normalizer import polish_tanglish_output  # noqa: E402
+from normalization.tanglish_audit import audit_non_ollama_translation  # noqa: E402
 from normalization.translation_validator import (  # noqa: E402
     TranslationReport,
+    malformed_blocks_fallback,
     score as translation_score,
     validate_translation,
 )
+from normalization.tanglish_rewrite import looks_tanglish  # noqa: E402
 
 logger = logging.getLogger("normalization.tanglish_translator")
 
 # Bump when the prompt changes so cached translations are not reused across
 # prompt versions.
-PROMPT_VERSION = "v2-strict-stateless"
+PROMPT_VERSION = "v3-natural-spoken"
 
 # ---------------------------------------------------------------------------
 # Prompts
@@ -104,7 +112,9 @@ SYSTEM_PROMPT = (
     "quantities, directions and other entities.\n"
     "\n"
     "Use natural spoken Chennai Tanglish, not literary Tamil and not Tamil "
-    "script."
+    "script.\n"
+    "\n"
+    + NATURAL_SPOKEN_GUIDELINES
 )
 
 FEWSHOT_NOTE = (
@@ -115,12 +125,16 @@ FEWSHOT_NOTE = (
 
 RETRY_PROMPT = (
     "Your previous output introduced information that was not present in the "
-    "source sentence.\n"
+    "source sentence, or sounded like stiff translated Tamil instead of "
+    "natural spoken Chennai Tanglish.\n"
     "\n"
     "Translate ONLY the source sentence.\n"
     "\n"
     "Do not add any new information.\n"
     "Do not mention anything the source does not mention.\n"
+    "Use natural modern spoken Tanglish: sila seconds (not konjam seconds), "
+    "-la vittuten for left-behind objects, dhaana-nu confirm/check for "
+    "verification, innum X nimisham-ku mela for time increases.\n"
     "Return one line of spoken Chennai Tanglish and nothing else.\n"
     "\n"
     "Source:\n"
@@ -143,6 +157,23 @@ _STOPWORDS = frozenset(
 
 _GOLD_LOCK = threading.Lock()
 _GOLD: list[tuple[str, str, frozenset[str]]] | None = None
+_GOLD_MTIME: float | None = None
+
+
+def _gold_file_mtime() -> float:
+    try:
+        return TANGLISH_GOLD_PAIRS_PATH.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
+def gold_pairs_version() -> str:
+    """Fingerprint of tanglish_gold_pairs.json for cache invalidation."""
+    try:
+        raw = TANGLISH_GOLD_PAIRS_PATH.read_bytes()
+    except OSError:
+        return "0"
+    return hashlib.sha256(raw).hexdigest()[:12]
 
 
 def _key_tokens(text: str) -> frozenset[str]:
@@ -152,10 +183,14 @@ def _key_tokens(text: str) -> frozenset[str]:
 
 
 def _gold_pairs() -> list[tuple[str, str, frozenset[str]]]:
-    global _GOLD
+    global _GOLD, _GOLD_MTIME
+    mtime = _gold_file_mtime()
     with _GOLD_LOCK:
-        if _GOLD is not None:
+        if _GOLD is not None and _GOLD_MTIME == mtime:
             return _GOLD
+        if _GOLD is not None and _GOLD_MTIME != mtime:
+            logger.info("Gold pairs file changed — reloading index")
+            _CACHE.clear()
         rows: list[tuple[str, str, frozenset[str]]] = []
         try:
             data = json.loads(TANGLISH_GOLD_PAIRS_PATH.read_text(encoding="utf-8"))
@@ -168,12 +203,39 @@ def _gold_pairs() -> list[tuple[str, str, frozenset[str]]]:
             if en and ta:
                 rows.append((en, ta, _key_tokens(en)))
         _GOLD = rows
+        _GOLD_MTIME = mtime
         return _GOLD
 
 
 def _normalize_key(text: str) -> str:
     t = (text or "").strip().lower()
-    t = re.sub(r"[\u201c\u201d\"']", "", t)
+    t = re.sub(r"[\u201c\u201d\"]", "", t)
+    # Expand contractions before stripping apostrophes (don't → do not, not dont).
+    for pat, repl in (
+        (r"\bdon't\b", "do not"),
+        (r"\bcan't\b", "cannot"),
+        (r"\bwon't\b", "will not"),
+        (r"\bisn't\b", "is not"),
+        (r"\baren't\b", "are not"),
+        (r"\bwasn't\b", "was not"),
+        (r"\bweren't\b", "were not"),
+        (r"\bdoesn't\b", "does not"),
+        (r"\bdidn't\b", "did not"),
+        (r"\bwouldn't\b", "would not"),
+        (r"\bshouldn't\b", "should not"),
+        (r"\bthere's\b", "there is"),
+        (r"\bit's\b", "it is"),
+        (r"\bthat's\b", "that is"),
+        (r"\bi'm\b", "i am"),
+        (r"\bi've\b", "i have"),
+        (r"\bi'll\b", "i will"),
+        (r"\bwe're\b", "we are"),
+        (r"\byou're\b", "you are"),
+        (r"\bthey're\b", "they are"),
+        (r"\blet's\b", "let us"),
+    ):
+        t = re.sub(pat, repl, t)
+    t = t.replace("'", "")
     t = re.sub(r"\s+", " ", t)
     return re.sub(r"[.!?]+$", "", t).strip()
 
@@ -363,9 +425,11 @@ def clear_cache() -> None:
 
 def reload_gold() -> None:
     """Drop the in-memory gold index so newly added pairs are picked up."""
-    global _GOLD
+    global _GOLD, _GOLD_MTIME
     with _GOLD_LOCK:
         _GOLD = None
+        _GOLD_MTIME = None
+    clear_cache()
 
 
 # ---------------------------------------------------------------------------
@@ -517,20 +581,21 @@ def translate_to_tanglish(
     gold = exact_gold(source)
     if gold:
         report = validate_translation(source, gold)
+        audit = audit_non_ollama_translation(source, gold, "gold")
         result = TanglishTranslation(
             text=gold,
             source=source,
             engine="gold",
             model=model,
-            ok=report.ok,
+            ok=report.ok and (audit.ok if audit else report.ok),
             attempts=0,
             latency_ms=(time.perf_counter() - started) * 1000,
-            flags=report.flags,
+            flags=report.flags + (audit.mix_flags if audit else []),
         )
         _log_debug(result)
         return result
 
-    cache_key = (model, PROMPT_VERSION, _normalize_key(source))
+    cache_key = (model, f"{PROMPT_VERSION}:{gold_pairs_version()}", _normalize_key(source))
     if caching:
         hit = _CACHE.get(cache_key)
         if hit is not None:
@@ -571,6 +636,7 @@ def translate_to_tanglish(
                 temperature=temperature if attempt < max_retries else min(0.2, temperature + 0.2),
                 timeout=timeout,
             )
+            out = polish_tanglish_output(out, source=source)
         except Exception as exc:  # noqa: BLE001
             last_error = exc
             logger.info("Tanglish model attempt %d failed: %s", attempts, exc)
@@ -620,8 +686,26 @@ def translate_to_tanglish(
             for f in report.hard_flags
         ):
             continue
+        if any(malformed_blocks_fallback(f) for f in report.hard_flags):
+            continue
+        if not looks_tanglish(out):
+            continue
         best_text, best_report = out, report
         break
+
+    if not best_text:
+        # Last resort: Tanglish that only failed soft register checks beats English.
+        for out, report in sorted(
+            candidates, key=lambda cr: translation_score(source, cr[0])
+        ):
+            if not looks_tanglish(out):
+                continue
+            if any(malformed_blocks_fallback(f) for f in report.hard_flags):
+                continue
+            if any(f.startswith("not_translated") for f in report.hard_flags):
+                continue
+            best_text, best_report = out, report
+            break
 
     if best_text:
         result = TanglishTranslation(

@@ -24,3 +24,6 @@ cost_analysis/results/**
 report/FINAL_REPORT.md
 reference_voices/reference.wav
 phone_test/.certs/
+dataset_pipeline/output/**
+!dataset_pipeline/output/.gitkeep
+!dataset_pipeline/output/**/.gitkeep

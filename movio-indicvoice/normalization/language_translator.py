@@ -44,11 +44,14 @@ from config import (  # noqa: E402
     TRANSLATOR_ENABLED,
     TRANSLATOR_OLLAMA_ENABLED,
 )
+from normalization.pronunciation_rules import strip_tamil_script  # noqa: E402
+from normalization.tanglish_style_normalizer import polish_tanglish_output  # noqa: E402
 from normalization.tanglish_rewrite import looks_tanglish, rewrite_en_to_tanglish  # noqa: E402
 from normalization.tanglish_translator import (  # noqa: E402
     exact_gold,
     translate_to_tanglish,
 )
+from normalization.tanglish_audit import audit_non_ollama_translation  # noqa: E402
 from normalization.translation_validator import validate_translation  # noqa: E402
 
 logger = logging.getLogger("normalization.translator")
@@ -244,6 +247,7 @@ class TranslateResult:
     target_lang: str
     engine: str
     skipped: bool = False
+    audit: dict | None = None
 
 
 def load_preserve_list(path: Path = PRESERVE_ENGLISH_LIST_PATH) -> list[str]:
@@ -401,7 +405,7 @@ def _ollama_translate(text: str, target: str) -> str:
 
 def _offline_rewrite(text: str, target: str) -> str:
     if target == "tanglish":
-        return rewrite_en_to_tanglish(text)
+        return polish_tanglish_output(rewrite_en_to_tanglish(text), source=text)
     out = text
     if target == "en":
         rules = _OFFLINE_TANGLISH_EN
@@ -434,6 +438,8 @@ def _offline_complete_enough(source: str, offline: str) -> bool:
     off = (offline or "").strip()
     src = (source or "").strip()
     if not off or off.lower() == src.lower():
+        return False
+    if _mostly_tamil_script(off):
         return False
     if not looks_tanglish(off):
         return False
@@ -508,8 +514,28 @@ def to_tanglish(text: str, detected: str, preserve: list[str] | None = None) -> 
         return offline, "offline-lexicon-fallback"
 
     if offline.strip() and offline.strip().lower() != text.strip().lower():
-        if looks_tanglish(offline) and len(offline.split()) >= max(4, int(0.4 * len(text.split()))):
-            return offline, "offline-lexicon-weak"
+        # Judge what will actually be spoken. Tamil glyphs are stripped further
+        # down the pipeline, so a Latin+Tamil rewrite that looks like Tanglish
+        # here can reach the TTS engine as bare English.
+        spoken = strip_tamil_script(offline).strip()
+        if (
+            spoken
+            and looks_tanglish(spoken)
+            and not _mostly_tamil_script(offline)
+            and len(spoken.split()) >= max(4, int(0.4 * len(text.split())))
+        ):
+            weak_hard = " ".join(validate_translation(text, spoken).hard_flags)
+            if not any(
+                bad in weak_hard
+                for bad in (
+                    "not_translated",
+                    "tamil_script",
+                    "number_invented",
+                    "meaning_loss",
+                    "malformed",
+                )
+            ):
+                return spoken, "offline-lexicon-weak"
         if validate_translation(text, offline).ok:
             return offline, "offline-lexicon"
 
@@ -599,7 +625,14 @@ def translate(
             out, engine = to_tanglish(raw, detected)
             if _is_bad_mt_output(out, raw):
                 return TranslateResult(raw, detected, target, "blocked-fallback", skipped=True)
-            return TranslateResult(out, detected, target, engine)
+            audit = audit_non_ollama_translation(raw, out, engine)
+            return TranslateResult(
+                out,
+                detected,
+                target,
+                engine,
+                audit=audit.to_dict() if audit else None,
+            )
 
     except Exception as exc:  # noqa: BLE001
         logger.warning("Translator failed (%s) — using original text", exc)

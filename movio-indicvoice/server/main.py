@@ -42,7 +42,7 @@ from config import (  # noqa: E402
     SERVER_PORT,
 )
 from server.cache import AudioCache  # noqa: E402
-from server.pipeline import TTSPipeline, get_backend  # noqa: E402
+from server.pipeline import TTSPipeline, get_backend, pronunciation_version  # noqa: E402
 from server.queue import QueueFullError, RequestTimeout, TTSQueue  # noqa: E402
 from server.websocket_stream import concat_wavs  # noqa: E402
 
@@ -135,8 +135,12 @@ async def lifespan(app: FastAPI):
     # pay the ~40s cold-load cost on a laptop GPU.
     try:
         from config import TRANSLATOR_OLLAMA_ENABLED
-        from normalization.tanglish_translator import warmup as tanglish_warmup
+        from normalization.tanglish_translator import reload_gold, warmup as tanglish_warmup
 
+        reload_gold()
+        if cache is not None:
+            cache.clear()
+            logger.info("Cleared audio cache after gold reload")
         if TRANSLATOR_OLLAMA_ENABLED:
             logger.info("Warming Tanglish translation model…")
             await asyncio.to_thread(tanglish_warmup)
@@ -303,6 +307,14 @@ async def health():
     pipe = _get_pipeline(DEFAULT_TTS_BACKEND)
     device = getattr(pipe.backend, "device", None)
     mock = bool(getattr(pipe.backend, "_mock", False))
+    try:
+        from normalization.tanglish_translator import _gold_pairs, gold_pairs_version
+
+        gold_count = len(_gold_pairs())
+        gold_version = gold_pairs_version()
+    except Exception:  # noqa: BLE001
+        gold_count = 0
+        gold_version = "unknown"
     return {
         "ok": True,
         "default_backend": _normalize_backend(DEFAULT_TTS_BACKEND),
@@ -310,9 +322,28 @@ async def health():
         "queue_enabled": QUEUE_ENABLED,
         "tts_device": device,
         "tts_mock": mock,
+        "gold_pairs": gold_count,
+        "gold_version": gold_version,
         "cache": cache.stats() if cache else None,
         "queue": tts_queue.stats() if tts_queue else None,
     }
+
+
+@app.post("/admin/reload-gold")
+async def admin_reload_gold():
+    """Reload gold pairs, clear translation + audio caches (dev hot-reload)."""
+    from normalization.pronunciation_rules import clear_pronunciation_cache
+    from normalization.tanglish_translator import _gold_pairs, gold_pairs_version, reload_gold
+
+    reload_gold()
+    clear_pronunciation_cache()
+    count = len(_gold_pairs())
+    if cache is not None:
+        cache.clear()
+    for pipe in _pipelines.values():
+        pipe.pronunciation_version = pronunciation_version(pipe.lexicon)
+    logger.info("Admin gold reload: %d pairs, version=%s", count, gold_pairs_version())
+    return {"ok": True, "gold_pairs": count, "gold_version": gold_pairs_version(), "cache_cleared": cache is not None}
 
 
 @app.post("/tts")

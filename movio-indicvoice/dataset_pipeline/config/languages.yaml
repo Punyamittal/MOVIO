@@ -1,0 +1,40 @@
+# Discovery queries — Tamil / Indian English / Tanglish / Movio domains
+tamil_conversational:
+  - Chennai Tamil conversation
+  - Tamil daily conversation
+  - Tamil street conversation
+  - Tamil interview
+  - Tamil vlog
+  - Tamil travel conversation
+  - Tamil customer service
+  - Tamil transportation conversation
+
+indian_english:
+  - Indian English conversation
+  - Chennai English conversation
+  - Indian English interview
+  - Indian English customer service
+  - Indian English travel conversation
+
+code_switching:
+  - Tamil English conversation
+  - Tanglish conversation
+  - Chennai Tanglish
+  - Tamil English vlog
+  - Tamil English interview
+  - Tamil-English speaking
+
+movio_domains:
+  - Chennai taxi conversation Tamil
+  - cab booking customer call Tamil
+  - ride booking pickup drop Tamil English
+  - airport pickup conversation India
+  - railway station directions Chennai
+  - hotel reception conversation Chennai
+  - food delivery customer call India
+  - customer support Tamil English
+  - traffic navigation directions Chennai
+  - UPI payment OTP verification conversation India
+
+# Creative Commons–oriented discovery (preferred for audio download)
+creative_commons_suffix: "creative commons"

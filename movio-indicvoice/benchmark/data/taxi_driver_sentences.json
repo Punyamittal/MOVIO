@@ -733,7 +733,9 @@
       "otp",
       "cache_pair"
     ],
-    "family": "share_otp"
+    "family": "share_otp",
+    "tanglish_ref": "OTP 4821 share pannunga.",
+    "language_mix": "tanglish"
   },
   {
     "text": "Please share the OTP 7392.",
@@ -805,7 +807,9 @@
       "cache_pair",
       "eta"
     ],
-    "family": "ask_wait_minutes"
+    "family": "ask_wait_minutes",
+    "tanglish_ref": "Driver-a five minutes wait panna sollunga.",
+    "language_mix": "tanglish"
   },
   {
     "text": "Please ask the driver to wait for ten minutes.",
@@ -1850,7 +1854,9 @@
     "stress": [
       "cache_pair",
       "driver_waiting_near_place"
-    ]
+    ],
+    "tanglish_ref": "Driver Guindy pakkathula wait pannitu irukkaaru.",
+    "language_mix": "tanglish"
   },
   {
     "text": "The driver is waiting near Velachery.",
@@ -2610,7 +2616,7 @@
       "gold_pair",
       "natural"
     ],
-    "tanglish_ref": "Enakku konjam seconds-ku munnadi OTP vandhuduchu, aana latest code-a correct driver-kitta dhaan share panren-nu confirm pannikanum."
+    "tanglish_ref": "Enakku sila seconds-ku munnadi OTP vandhuduchu, aana latest code-a correct driver-kitta dhaan share panren-nu confirm pannikanum."
   },
   {
     "text": "Please tell the driver to slow down because I have not finished putting my luggage inside the vehicle.",
@@ -3631,5 +3637,1615 @@
       "natural"
     ],
     "tanglish_ref": "Destination-ku approximately five minutes distance-la varumbodhu enakku sollunga."
+  },
+  {
+    "text": "I need to reach the airport before 7:30 PM.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Enakku airport-ku 7:30 PM-ku munnadi reach aaganum."
+  },
+  {
+    "text": "The driver has arrived.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Driver vandhutaanga."
+  },
+  {
+    "text": "The driver will arrive in five minutes.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Driver five minutes-la vandhuruvaanga."
+  },
+  {
+    "text": "Tell the driver I am at the main gate with two bags.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Naan main gate-la rendu bags-oda irukken-nu driver-kitta sollunga."
+  },
+  {
+    "text": "The OTP is 4821.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "OTP 4821."
+  },
+  {
+    "text": "I am waiting near the parking entrance.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Naan parking entrance pakkathula wait pannitu irukken."
+  },
+  {
+    "text": "I need to reach the airport.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Enakku airport-ku reach aaganum."
+  },
+  {
+    "text": "I am standing near the security gate with a red suitcase, aana the driver has stopped on the opposite side of the road, so please ask him to turn around and come to the main entrance.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Naan security gate pakkathula red suitcase-oda nikkiren, aana driver road-oda opposite side-la stop pannitaanga, so avara thirumbi main entrance-ku vara sollunga."
+  },
+  {
+    "text": "I'm standing near the security gate with a red suitcase, but the driver has stopped on the opposite side of the road, so please ask him to turn around and come to the main entrance.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Naan security gate pakkathula red suitcase-oda nikkiren, aana driver road-oda opposite side-la stop pannitaanga, so avara thirumbi main entrance-ku vara sollunga."
+  },
+  {
+    "text": "I am standing near the security gate with a red suitcase.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Naan security gate pakkathula red suitcase-oda nikkiren."
+  },
+  {
+    "text": "Please wait for five minutes.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Innum five minutes wait pannunga."
+  },
+  {
+    "text": "I am waiting near the security gate.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Naan security gate pakkathula wait pannitu irukken."
+  },
+  {
+    "text": "I am waiting outside the building near the security gate, so please ask the driver to come here.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "X"
+    ],
+    "tanglish_ref": "Naan security gate kitta building outside-la wait pannit iruken, driver-a inge vara sollung."
+  },
+  {
+    "text": "The app is stuck on the searching screen for the last five minutes and hasn't matched a driver yet.",
+    "category": "app_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "app"
+    ],
+    "tanglish_ref": "App kadaisi ainthu nimishama searching screen-la stuck aayirukku, innum driver-a match pannala."
+  },
+  {
+    "text": "My location on the app seems to be pinned to a completely different area than where I actually am.",
+    "category": "app_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "app"
+    ],
+    "tanglish_ref": "App-la enoda location naan actual-a irukura area vida completely vera area-la pin aayirukku."
+  },
+  {
+    "text": "The estimated arrival time keeps changing every few seconds, so I'm not sure how long I should actually wait.",
+    "category": "app_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "app"
+    ],
+    "tanglish_ref": "Estimated arrival time konja nimishathukku onnu maari maari irukku, so exact-a evlo neram wait pannanum nu theriyala."
+  },
+  {
+    "text": "I need to cancel this ride since my plans changed suddenly, I hope there's no cancellation charge this time.",
+    "category": "cancellation_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "cancellation"
+    ],
+    "tanglish_ref": "Enoda plans suddenly change aanadhunaala indha ride-a cancel pannanum, indha thadava cancellation charge illama irukum nu nenaikuren."
+  },
+  {
+    "text": "The driver isn't moving on the map at all, so I think I should cancel and book a new ride instead.",
+    "category": "cancellation_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "cancellation"
+    ],
+    "tanglish_ref": "Driver map-la ippadiye nikkuraru, so naan cancel pannitu vera oru ride book pannuradhu nallaadhu nu nenaikuren."
+  },
+  {
+    "text": "Could you please rebook the ride with a different driver, since this one seems to be stuck somewhere far away.",
+    "category": "cancellation_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "cancellation"
+    ],
+    "tanglish_ref": "Vera driver-a vachu ride-a rebook pannalama, indha driver romba dhooram edho stuck aayirukura maadhiri irukku."
+  },
+  {
+    "text": "I accidentally booked the wrong pickup location, so could you help me cancel this without any penalty?",
+    "category": "cancellation_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "cancellation"
+    ],
+    "tanglish_ref": "Naan thappa vera pickup location book pannitten, so idha penalty illama cancel panna help pannunga."
+  },
+  {
+    "text": "Since the estimated wait time keeps increasing, I think it's better to cancel and try booking again later.",
+    "category": "cancellation_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "cancellation"
+    ],
+    "tanglish_ref": "Estimated wait time continuous-a jaasthi aagirathunaala, cancel pannitu appuram vera try pannuradhu nallaadhu nu nenaikuren."
+  },
+  {
+    "text": "The driver called and asked me to cancel from my end because of some issue with his vehicle.",
+    "category": "cancellation_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "cancellation"
+    ],
+    "tanglish_ref": "Driver call pannitu, vandi-la edho issue irukku so enoda side-la irundhu cancel pannunga nu kettaru."
+  },
+  {
+    "text": "The driver took a much longer route than necessary, and I don't think that was intentional but I'd like it noted.",
+    "category": "complaints_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "complaints"
+    ],
+    "tanglish_ref": "Driver venumaana route vida romba nera route edutharu, adhu intentional-a nenaikkala aana idha note pannanum nu solren."
+  },
+  {
+    "text": "I felt the driver was on the phone for most of the ride, which made me a little uncomfortable given the traffic.",
+    "category": "complaints_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "complaints"
+    ],
+    "tanglish_ref": "Driver ride full time-la phone-la pesikitu irundhaaru maadhiri thonuchu, traffic-la irundhathunaala enakku konjam uncomfortable-a irundhuchu."
+  },
+  {
+    "text": "The car had a strong smell of cigarette smoke, so I'd like to request a cleaner vehicle for future rides.",
+    "category": "complaints_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "complaints"
+    ],
+    "tanglish_ref": "Vandi-la cigarette smoke smell romba strong-a irundhuchu, so future ride-ku clean-a irukura vandi venum nu request pannuren."
+  },
+  {
+    "text": "The driver refused to switch on the AC even though it was requested, and I'd like this to be looked into.",
+    "category": "complaints_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "complaints"
+    ],
+    "tanglish_ref": "Request pannirundhalum driver AC podama irunthaaru, so idha paathukanum nu solren."
+  },
+  {
+    "text": "I was charged for a cancellation even though I cancelled well within the free cancellation window shown in the app.",
+    "category": "complaints_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "complaints"
+    ],
+    "tanglish_ref": "App-la kaattura free cancellation window-kulla cancel pannirundhalum, enakku cancellation charge podirukanga."
+  },
+  {
+    "text": "The driver arrived nearly twenty minutes late without any prior notification, which caused me to miss my appointment.",
+    "category": "complaints_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "complaints"
+    ],
+    "tanglish_ref": "Driver munnadi edhuvum sollama almost irubathu nimisham late-a vandhaaru, adhunaala enoda appointment miss aayiduchu."
+  },
+  {
+    "text": "The vehicle that arrived didn't match the number plate shown in the app, so I was initially hesitant to board.",
+    "category": "complaints_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "complaints"
+    ],
+    "tanglish_ref": "Vandha vandi-oda number plate app-la kaattura number plate-oda match aagala, so mudhalla naan erika hesitate pannen."
+  },
+  {
+    "text": "I'd like to raise a concern about the driver's rash driving, especially near the school zone we passed earlier.",
+    "category": "complaints_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "complaints"
+    ],
+    "tanglish_ref": "Driver-oda rash driving-a pathi oru concern raise pannanum, especially naanga cross pannina school zone pakkathula."
+  },
+  {
+    "text": "Thank you so much for waiting patiently, I really appreciate you accommodating the delay on my end.",
+    "category": "courtesy_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "courtesy"
+    ],
+    "tanglish_ref": "Patience-a wait pannadhukku romba nandri, enoda delay-a accommodate pannadhukku really appreciate pannuren."
+  },
+  {
+    "text": "I hope the rest of your day goes smoothly, and thanks again for getting me here safely despite the traffic.",
+    "category": "courtesy_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "courtesy"
+    ],
+    "tanglish_ref": "Unga naeku baaki nalla poga vendum nu nenaikuren, traffic-la irundhalum enna safe-a kuttitu vandhadhukku romba nandri."
+  },
+  {
+    "text": "Please take the flyover this time instead of the service road, since the service road usually has more traffic.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Indha thadava service road-a vidama flyover-a edunga, service road-la usually traffic jaasthi irukum."
+  },
+  {
+    "text": "After the second traffic signal, please take a right turn and continue until you see a big temple on the left.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Rendaavadhu traffic signal-kku aprom, right turn edunga, left side-la periya kovil varaikkum po."
+  },
+  {
+    "text": "There's a one-way street coming up, so please take the previous left instead of going straight.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Munnadi oru one-way street varum, so straight-a poganum nu illama adhukku munnadi left edunga."
+  },
+  {
+    "text": "Please don't follow the app's suggestion here, since that road is closed for repair work right now.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Inga app sollara route-a follow pannadheenga, andha road ippo repair work-ku close pannirukanga."
+  },
+  {
+    "text": "Once you cross the railway bridge, take the second lane on the right, not the first one.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Railway bridge cross pannadhukku aprom, right side rendaavadhu lane edunga, mudhal lane venaam."
+  },
+  {
+    "text": "This area has a lot of one-way roads, so it might be easier if I guide you turn by turn instead of using the map.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Indha area-la neriya one-way roads irukku, so map use pannadha vida naan turn by turn guide pannuradhu easy-a irukum."
+  },
+  {
+    "text": "Please slow down near the school zone ahead, since children usually cross the road around this time.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Munnadi irukura school zone pakkathula slow-a poonga, indha time-la usually kuzhandhaikal road cross pannuvanga."
+  },
+  {
+    "text": "The GPS is showing a shortcut through the narrow lane, but that road is too small for this car to pass.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "GPS chinna lane-la shortcut kaattutu irukku, aana andha road indha vandi pogura alavukku chinnadhu."
+  },
+  {
+    "text": "Please continue straight past the bus stop, and I'll tell you exactly where to turn once we get closer.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Bus stop-a thaandi straight-a po, naanga pakkathula vandhadhum exact-a enga thirumbanum nu solren."
+  },
+  {
+    "text": "Instead of turning at the roundabout, please take the road just before it that leads directly to my street.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Roundabout-la thirumbadha, adhukku munnadi irukura road-a edunga, adhu direct-a enoda street-ku poidum."
+  },
+  {
+    "text": "The driver is almost here.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver vandhuta maadhiri irukkaru."
+  },
+  {
+    "text": "The driver is already here.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver already vandhutaru."
+  },
+  {
+    "text": "The driver has arrived, please come outside.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver vandhutaru, please veliya vaanga."
+  },
+  {
+    "text": "The driver is behind the building.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver building pinnaadi irukkaru."
+  },
+  {
+    "text": "The driver is waiting beside the gate.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver gate pakathule wait pannuraru."
+  },
+  {
+    "text": "The driver has arrived near the building.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver building pakathule vandhutaru."
+  },
+  {
+    "text": "Please tell the driver to come to the main entrance.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver-a main entrance-ku vara sollunga."
+  },
+  {
+    "text": "The driver is in front of the building.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver building munnadi irukkaru."
+  },
+  {
+    "text": "The driver is coming.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver vandhutu irukkaru."
+  },
+  {
+    "text": "The driver is waiting at the main entrance.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver main entrance-le wait pannuraru."
+  },
+  {
+    "text": "The driver is near the bus stop.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver bus stop pakathule irukkaru."
+  },
+  {
+    "text": "The driver is near the signal.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver signal pakathule irukkaru."
+  },
+  {
+    "text": "The driver has not arrived yet.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver innum varala."
+  },
+  {
+    "text": "The driver is on the way.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver vandhutu irukkaru."
+  },
+  {
+    "text": "The driver is at the opposite entrance.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver opposite entrance-le irukkaru."
+  },
+  {
+    "text": "The driver is waiting on the other side of the road.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver road-oda opposite side-le wait pannuraru."
+  },
+  {
+    "text": "The driver is parked outside.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver veliya park pannirukkaru."
+  },
+  {
+    "text": "The driver is waiting in the parking area.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver parking area-le wait pannuraru."
+  },
+  {
+    "text": "The driver reached the location.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver location-ku vandhutaru."
+  },
+  {
+    "text": "The driver reached the wrong location.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver thappana location-ku vandhutaru."
+  },
+  {
+    "text": "The driver is waiting near the security gate.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver security gate pakathule wait pannuraru."
+  },
+  {
+    "text": "The driver is next to the security office.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver security office pakathule irukkaru."
+  },
+  {
+    "text": "The driver is standing near the gate.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver gate pakathule ninnutu irukkaru."
+  },
+  {
+    "text": "Please tell the driver that I am coming.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Naan vandhutu irukken-nu driver-kitta sollunga."
+  },
+  {
+    "text": "The driver will reach in ten minutes.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver ten minutes-la vandhuruvaru."
+  },
+  {
+    "text": "Please ask the driver to wait there.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver-a anga wait panna sollunga."
+  },
+  {
+    "text": "The driver is waiting outside.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver veliya wait pannuraru."
+  },
+  {
+    "text": "The driver is waiting near the wrong building.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver thappana building pakathule wait pannuraru."
+  },
+  {
+    "text": "The driver has arrived, but he is waiting near the wrong entrance.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver pakathule vandhutaru, aana thappana entrance-le wait pannuraru."
+  },
+  {
+    "text": "The driver went to the wrong entrance.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver thappana entrance-ku poitaru."
+  },
+  {
+    "text": "The driver is waiting at the wrong gate.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver thappana gate-le wait pannuraru."
+  },
+  {
+    "text": "The driver came to the wrong location.",
+    "category": "driver_status_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "driver"
+    ],
+    "tanglish_ref": "Driver thappana location-ku vandhutaru."
+  },
+  {
+    "text": "Please drop me right in front of the pharmacy, not near the bus stop, since I need to pick up a prescription.",
+    "category": "dropoff_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "dropoff"
+    ],
+    "tanglish_ref": "Bus stop pakkathula illama, pharmacy munnadi thaan drop pannunga, naan prescription vaanganum."
+  },
+  {
+    "text": "This is not the correct building, my apartment complex is the next one, about two hundred meters ahead.",
+    "category": "dropoff_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "dropoff"
+    ],
+    "tanglish_ref": "Idhu correct building illa, enoda apartment complex adutha onnu, rendu nooru meter mela irukku."
+  },
+  {
+    "text": "Please stop the car here itself, I can walk the rest of the way since the road ahead is very narrow.",
+    "category": "dropoff_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "dropoff"
+    ],
+    "tanglish_ref": "Inga thaan vandi-a nikathunga, munnadi road romba narrow-a irukurathunaala baaki naan nadanthu poiduven."
+  },
+  {
+    "text": "Could you drop me at the back entrance instead of the front, since the front gate is currently closed for renovation?",
+    "category": "dropoff_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "dropoff"
+    ],
+    "tanglish_ref": "Front-a vidama back entrance-la drop pannalama, front gate renovation-ku ippo close pannirukanga."
+  },
+  {
+    "text": "Please wait for just a moment after dropping me, in case I need to come back for something I forgot.",
+    "category": "dropoff_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "dropoff"
+    ],
+    "tanglish_ref": "Drop pannadhukku aprom konja neram wait pannunga, naan edho marandhadha thirumba vara vendi irundha."
+  },
+  {
+    "text": "This is my stop, but please pull over a little further since there's a car parked right in front of the gate.",
+    "category": "dropoff_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "dropoff"
+    ],
+    "tanglish_ref": "Idhu enoda stop, aana konjam mela po, gate munnadi oru vandi park pannirukku."
+  },
+  {
+    "text": "Please be careful while dropping me here since the road has a small pothole right next to the curb.",
+    "category": "dropoff_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "dropoff"
+    ],
+    "tanglish_ref": "Inga drop pannumbodhu konjam careful-a irukanga, curb pakkathula oru chinna pothole irukku."
+  },
+  {
+    "text": "I need to be dropped exactly at gate number three, since the other gates don't allow visitor entry after six.",
+    "category": "dropoff_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "dropoff"
+    ],
+    "tanglish_ref": "Naan exact-a gate number moonu-la drop aaganum, vera gate-la aaru mani-kku aprom visitor entry kidaiyathu."
+  },
+  {
+    "text": "This is somewhat urgent since I have a flight to catch in an hour, so please try to take the fastest route possible.",
+    "category": "emergency_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "emergency"
+    ],
+    "tanglish_ref": "Idhu konjam urgent, oru mani neram-la enakku flight irukku, so mudinjavarai fastest route-a edunga."
+  },
+  {
+    "text": "I have two large suitcases with me, so could you please check if there's enough space in the boot?",
+    "category": "luggage_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "luggage"
+    ],
+    "tanglish_ref": "En kitta rendu periya suitcase irukku, so boot-la pothuma space irukka nu check pannunga."
+  },
+  {
+    "text": "Please be careful while lifting the bag into the boot, since it has some fragile items packed inside.",
+    "category": "luggage_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "luggage"
+    ],
+    "tanglish_ref": "Bag-a boot-la vekkumbodhu careful-a irukanga, adhukulla konjam fragile items pack pannirukken."
+  },
+  {
+    "text": "Could you help me take the bags out once we reach, since I'll have my hands full with the other items?",
+    "category": "luggage_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "luggage"
+    ],
+    "tanglish_ref": "Naanga reach aanadhum bag-a edukka help pannunga, en kaila vera items irukum."
+  },
+  {
+    "text": "We need to make one quick stop at the pharmacy on the way, it shouldn't take more than five minutes.",
+    "category": "multistop_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "multistop"
+    ],
+    "tanglish_ref": "Vazhila oru pharmacy-la chinna stop pannanum, ainthu nimishathukku mela edukkathu."
+  },
+  {
+    "text": "My friend will also be joining midway, so please stop near the bus stand after the second signal.",
+    "category": "multistop_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "multistop"
+    ],
+    "tanglish_ref": "Enoda friend kooda naduvula erikuvaru, so rendaavadhu signal-kku aprom bus stand pakkathula nikkunga."
+  },
+  {
+    "text": "Since this is a shared ride, please confirm if the other passenger is being picked up before or after me.",
+    "category": "multistop_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "multistop"
+    ],
+    "tanglish_ref": "Idhu shared ride-nala, vera passenger-a enakku munnadiya illana pinnadiya pick pannuvanga nu confirm pannunga."
+  },
+  {
+    "text": "We have two drop points on this trip, so please drop me first since my location is closer.",
+    "category": "multistop_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "multistop"
+    ],
+    "tanglish_ref": "Indha trip-la rendu drop point irukku, enoda location pakkathula irukurathunaala enna mudhalla drop pannunga."
+  },
+  {
+    "text": "Could you wait for two minutes at the ATM, I just need to withdraw some cash before we continue.",
+    "category": "multistop_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "multistop"
+    ],
+    "tanglish_ref": "ATM-la rendu nimisham wait pannalama, naan konjam cash edukanum, appuram continue pannalam."
+  },
+  {
+    "text": "Could you please share the OTP with the driver so he can confirm and start the trip officially?",
+    "category": "otp_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "otp"
+    ],
+    "tanglish_ref": "Driver-kitta OTP sollunga, avaru confirm pannitu trip-a officially start pannuvaaru."
+  },
+  {
+    "text": "I haven't received the OTP yet, could you resend it or check if there's a network issue on my end?",
+    "category": "otp_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "otp"
+    ],
+    "tanglish_ref": "Enakku innum OTP varala, mela onnu anupunga illana enoda side-la network issue irukka nu check pannunga."
+  },
+  {
+    "text": "The OTP the driver entered doesn't match what's showing on my screen, so could we try generating a new one?",
+    "category": "otp_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "otp"
+    ],
+    "tanglish_ref": "Driver podra OTP enoda screen-la kaattura OTP-oda match aagala, so pudhusa oru OTP generate pannalama?"
+  },
+  {
+    "text": "Please don't start the trip until I confirm the OTP, since I want to make sure this is the correct vehicle.",
+    "category": "otp_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "otp"
+    ],
+    "tanglish_ref": "Naan OTP confirm pannura varaikkum trip start pannadheenga, idhu correct vandi thaana nu naan sure pannikanum."
+  },
+  {
+    "text": "Since my phone signal is weak right now, it might take a minute for the OTP message to actually reach me.",
+    "category": "otp_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "otp"
+    ],
+    "tanglish_ref": "Ippo enoda phone signal weak-a irukurathunaala, OTP message vara oru nimisham aagalam."
+  },
+  {
+    "text": "The app is showing that my driver has already reached the pickup point, but I've been standing outside for the last ten minutes and I don't see any car nearby, so I think either the GPS is showing the wrong location or he's waiting at a completely different gate.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "App-la enoda driver already pickup point-ku vandhuduchu nu kaattuthu, aana naan kadaisi pathu nimisham-a veliye nikkuren, romba nerama pakkathula oru vandi kooda kaanom, so ippadi thonuthu, GPS thappu location kaattuthu illana avaru vera edho gate-la wait pannuraru nu."
+  },
+  {
+    "text": "The reason I'm cancelling this ride is not because of the driver, but because the app charged me twice for the same booking, and until that refund is processed, I don't feel comfortable booking another ride using the same payment method, so I'll wait until customer support responds to my complaint.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Naan indha ride-a cancel pannuratha karanam driver-a pathi illa, app anda booking-kku rendu thadava charge pannitutu, andha refund process aagura varaikkum, naan andha payment method-a use pannitu vera ride book panna comfortable-a feel pannala, so customer support enoda complaint-ku reply pannura varaikkum naan wait pannuren."
+  },
+  {
+    "text": "I can't come near, you're stopped for a while, please call the driver and tell him.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Naan kitta vara mudiyathu, neenga konja nerathula stop pannitu iruken, driver-a phone panni sollunga."
+  },
+  {
+    "text": "Please tell the driver that once he crosses the second signal, he should not take the flyover like the app is showing, because there's road construction going on up there, and instead he should continue straight on the service road until he sees a petrol bunk on the right, and take the small lane right after that.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Driver-kitta sollunga, rendaavadhu signal cross pannadhukku aprom, app kaattura maadhiri flyover-a edukkakoodadhu nu, mela road construction nadakkuthu, adhukku badhila service road-la straight-a po sollunga, right side-la petrol bunk varaikkum po, adha kadanthadhukku aprom irukkura chinna lane-la thirumbunga."
+  },
+  {
+    "text": "Since it's raining heavily right now and the traffic near the flyover is completely blocked because of a diversion, I think it would be better if the driver takes the inner road route instead of the main road, even if it takes a few extra minutes, because at least we won't be stuck for an hour.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Ippo romba mazhai peiyurathunaalum, flyover pakkathula diversion irukkurathunaalum traffic completely block aagi iruku, so driver main road-a vidama inner road route-la po nu naan nenaikkuren, konjam extra nimisham aanalum paravaila, ella onnu mani neram jam-la nikkama irukalam."
+  },
+  {
+    "text": "I'm still at the office, it'll take a bit of time, please tell the driver to wait.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Naan innum office-la iruken, konja neram aagum, driver kitta wait pannunga sollunga."
+  },
+  {
+    "text": "I am still at the office, it will take a bit of time, please tell the driver to wait.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Naan innum office-la iruken, konja neram aagum, driver kitta wait pannunga sollunga."
+  },
+  {
+    "text": "Even though the fare shown in the app before the ride started was around two hundred rupees, the driver is now saying that because of the surge pricing and the toll charges on this route, the final amount will be almost double, so I want to know if this is normal or if I should file a complaint with support.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Ride start aagurathukku munnadi app-la fare rendu nooru rupaa maadhiri kaattinalum, ippo driver sollara, surge pricing um indha route-la toll charge um irukkurathunaala, final amount almost double aagum nu, so idhu normal-a illana support-kitta complaint pannanuma nu enakku theriyanum."
+  },
+  {
+    "text": "I'm currently standing near the security gate outside the apartment complex, but since there are two entrances on this road, please ask the driver to confirm which side he's coming from before he gets confused and goes to the wrong gate.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Naan ipo apartment complex veliye security gate pakkathula nikkuren, aana indha road-la rendu entrance irukkurathunala, driver confuse aagi thappu gate-ku poaradhukku munnadi, avaru eppadi vara pora nu confirm pannunga."
+  },
+  {
+    "text": "Since there are two of us traveling together but only one pickup pin was shared, please make sure the driver waits at the main entrance instead of the side gate, because my friend is coming from the other building and it'll be easier for both of us to meet him at one common point rather than confusing him with two different locations.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Naanga rendu per kooda poganum aana oru pickup pin thaan share pannirukom, so driver side gate-a vidama main entrance-la wait pannanum nu confirm pannunga, en friend vera building-la irundhu varaaru, so rendu per onnu spot-la avaru kooda meet pannuradhu easy-a irukum, rendu vera location kudutha avaru confuse aaguvaaru."
+  },
+  {
+    "text": "Before you drop me off, could you please wait for exactly two minutes near the gate because I need to run inside and grab a package that I forgot, and I promise it won't take any longer than that since the security guard already has it ready at the front desk.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Neenga ennai drop pannadhukku munnadi, gate pakkathula rendu nimisham exact-a wait pannunga, naan ulle odi marandha package-a edukkanum, adhu adhukku mela time edukkadhu nu naan promise pannuren, security guard already front desk-la ready-a vachirukaru."
+  },
+  {
+    "text": "I understand that the driver might be new to this area, but this is the third time he's missed the turn even after I explained it clearly, so at this point I think it would be faster if I just share my live location on WhatsApp so he can follow it directly instead of relying on the app's navigation.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Driver-kku indha area pudhusa irukkalam nu enakku puriyudhu, aana naan clear-a solli kooda idhu moonaavadhu thadava avaru turn miss pannirukaru, so ippo naan WhatsApp-la enoda live location share pannitten na avaru direct-a follow pannalam, app navigation-a nambaama."
+  },
+  {
+    "text": "The car has already arrived here, but the address you gave is wrong, please confirm a bit.",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Vandi already inga vandhuduchu, aana neenga sonna address thappa iruku, konjam confirm pannunga."
+  },
+  {
+    "text": "I know I gave you the wrong drop location earlier by mistake, and I'm really sorry for the confusion, but if it's possible, could you please ask the driver to take a U-turn at the next signal and come back to the correct building, which is actually just two minutes away from where we currently are?",
+    "category": "passenger_request_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "passenger"
+    ],
+    "tanglish_ref": "Naan mudhalla thappu drop location kudutten nu enakku theriyum, andha confusion-ku romba sorry, aana mudinjaa, adutha signal-la driver U-turn edukkanum nu sollunga, correct building-ku thirumba vaanga, adhu ippo naanga irukura idathula irundhu rendu nimisham dhooram thaan."
+  },
+  {
+    "text": "Could you confirm whether the fare shown in the app already includes the toll charges for this route?",
+    "category": "payment_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "payment"
+    ],
+    "tanglish_ref": "App-la kaattura fare-la indha route-oda toll charge already add pannirukanga nu confirm pannalama?"
+  },
+  {
+    "text": "I'd prefer to pay by UPI instead of cash, so please make sure the driver has a scanner code ready.",
+    "category": "payment_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "payment"
+    ],
+    "tanglish_ref": "Naan cash-a vida UPI-la pay pannuradha prefer pannuren, so driver kitta scanner code ready-a vachirukanga."
+  },
+  {
+    "text": "The final fare seems higher than what was quoted at the start, so could you explain why the difference happened?",
+    "category": "payment_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "payment"
+    ],
+    "tanglish_ref": "Final fare start-la sonnadha vida jaasthi maadhiri irukku, so idhu yeppadi difference vandhuchu nu explain pannunga."
+  },
+  {
+    "text": "I don't have exact change right now, so is it possible to round off the fare to the nearest ten rupees?",
+    "category": "payment_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "payment"
+    ],
+    "tanglish_ref": "Ippodhaikku enakku exact change illa, so fare-a adutha pathu rupaa-ku round off pannalama?"
+  },
+  {
+    "text": "Since the ride included a toll crossing, please add that amount separately instead of clubbing it with the base fare.",
+    "category": "payment_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "payment"
+    ],
+    "tanglish_ref": "Ride-la toll crossing irundhadhunaala, andha amount-a base fare kooda clubbing pannadha, separate-a add pannunga."
+  },
+  {
+    "text": "I noticed I was charged twice for the same trip, so could you please look into this and process a refund?",
+    "category": "payment_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "payment"
+    ],
+    "tanglish_ref": "Naan same trip-ku rendu thadava charge aana maadhiri paakuren, so idha paathu refund process pannunga."
+  },
+  {
+    "text": "Is there any additional charge for waiting time, or is that already included in the total fare shown?",
+    "category": "payment_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "payment"
+    ],
+    "tanglish_ref": "Wait time-ku edhavadhu extra charge irukka, illana adhu already total fare-la include aayirukka?"
+  },
+  {
+    "text": "Could you send me the receipt over email as well, since I need it for reimbursement from my office?",
+    "category": "payment_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "payment"
+    ],
+    "tanglish_ref": "Receipt-a email-lakum anupungala, enakku office-la reimbursement-ku vendiyathu."
+  },
+  {
+    "text": "Please come to the main gate, not the side entrance, since the side gate is locked right now.",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Main gate-ku vaanga, side entrance-ku venaam, ippo side gate lock-a irukku."
+  },
+  {
+    "text": "I am standing right next to the security cabin, wearing a blue shirt, so it should be easy to spot me.",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Naan security cabin pakkathula nikkuren, blue shirt podutu irukken, so enna kandupudikardhu easy-a irukum."
+  },
+  {
+    "text": "The pin you have is slightly off, so please ask the driver to come a little further down the road.",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Neenga vachiruka pin konjam thappa irukku, so driver-a konjam mela road-la vaanga sollunga."
+  },
+  {
+    "text": "I'm on the first floor of the mall, so it'll take me two minutes to come down to the parking area.",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Naan mall first floor-la irukken, so parking area-ku varadhukku rendu nimisham aagum."
+  },
+  {
+    "text": "Please tell the driver that our building doesn't allow cars inside, so he should wait at the main road.",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Driver-kitta sollunga, enga building-ku ulla vandi anumadhikama, so main road-la wait pannunga sollunga."
+  },
+  {
+    "text": "There are two apartments with almost the same name here, so please double check the block number.",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Inga rendu apartment almost same name-la irukku, so block number-a double check pannunga."
+  },
+  {
+    "text": "I just came out of the metro station, so please tell the driver to wait near exit number two.",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Naan ippo thaan metro station-la irundhu veliye vandhen, so driver-kitta exit number rendu pakkathula wait pannunga nu sollunga."
+  },
+  {
+    "text": "The address I entered is my office, but I'm actually waiting near the coffee shop right across the street.",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Naan podra address enoda office thaan, aana naan actual-a andha road-oda opposite-la irukura coffee shop pakkathula wait pannuren."
+  },
+  {
+    "text": "My phone battery is very low, so if the driver can't reach me by call, please try messaging instead.",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Enoda phone battery romba kammi irukku, so driver call panni reach panna mudiyalana, message pannunga sollunga."
+  },
+  {
+    "text": "It's quite dark near my house, so please tell the driver to flash the headlights once he's close so I can spot the car.",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Enoda veedu pakkathula romba irutta irukku, so driver kitta pakkathula vandhathum headlight flash pannunga sollunga, naan vandi-a kandupudikaren."
+  },
+  {
+    "text": "Please make sure the child lock is on for the back seat since I have a toddler traveling with me.",
+    "category": "safety_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "safety"
+    ],
+    "tanglish_ref": "Back seat-la child lock on-a irukanum, enakooda oru chinna kuzhandhai varudhu."
+  },
+  {
+    "text": "Could you drive a little more carefully around the speed bumps, since I'm feeling a bit motion sick today.",
+    "category": "safety_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "safety"
+    ],
+    "tanglish_ref": "Speed bump pakkathula konjam careful-a drive pannunga, enakku indha naeku konjam motion sickness maadhiri irukku."
+  },
+  {
+    "text": "Please avoid using the phone while driving, it makes me a little nervous especially in this traffic.",
+    "category": "safety_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "safety"
+    ],
+    "tanglish_ref": "Drive pannumbodhu phone use pannadheenga, adhu enna konjam nervous-a pannuthu, especially indha traffic-la."
+  },
+  {
+    "text": "Since it's raining heavily, please keep the wipers on and drive a bit slower than usual.",
+    "category": "safety_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "safety"
+    ],
+    "tanglish_ref": "Romba mazhai peiyurathunaala, wiper on-a vachitu usual-a vida konjam slow-a drive pannunga."
+  },
+  {
+    "text": "I noticed the seatbelt in the back seat isn't working properly, could you please help me fix it?",
+    "category": "safety_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "safety"
+    ],
+    "tanglish_ref": "Back seat-la seatbelt properly work aagala, idha fix panna help pannunga."
+  },
+  {
+    "text": "Please roll up the windows a little since the dust from the construction site is coming inside the car.",
+    "category": "safety_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "safety"
+    ],
+    "tanglish_ref": "Construction site-la irundhu dust ulla varudhu, so window-a konjam mela pottukanga."
+  },
+  {
+    "text": "There's a huge traffic jam near the flyover because of an accident, so it might take an extra twenty minutes.",
+    "category": "traffic_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "traffic"
+    ],
+    "tanglish_ref": "Flyover pakkathula accident irundhadhunaala periya traffic jam irukku, so extra irubathu nimisham aagalam."
+  },
+  {
+    "text": "Since there's a VIP movement expected on the main road, it might be better to take the bypass route instead.",
+    "category": "traffic_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "traffic"
+    ],
+    "tanglish_ref": "Main road-la VIP movement irukum nu expect pannuvanga, so adhukku badhila bypass route edukurathu nallaadhu."
+  },
+  {
+    "text": "The signal near the junction has been down for a while, so traffic is being managed manually and moving slowly.",
+    "category": "traffic_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "traffic"
+    ],
+    "tanglish_ref": "Junction pakkathula signal konja neramaaga work aagala, so traffic manual-a manage panniyum slow-a poitu irukku."
+  },
+  {
+    "text": "Because of the ongoing metro construction work, this stretch of road has been reduced to a single lane.",
+    "category": "traffic_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "traffic"
+    ],
+    "tanglish_ref": "Metro construction work nadakkurathunaala, indha road stretch single lane-a reduce aayirukku."
+  },
+  {
+    "text": "There seems to be a protest happening near the college, so a few roads in that area are currently blocked.",
+    "category": "traffic_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "traffic"
+    ],
+    "tanglish_ref": "College pakkathula protest nadakkura maadhiri irukku, so andha area-la konjam roads block aayirukku."
+  },
+  {
+    "text": "Since it's peak office hour right now, please expect the ride to take almost double the usual time.",
+    "category": "traffic_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "traffic"
+    ],
+    "tanglish_ref": "Ippo peak office hour-nala, usual time-a vida almost double time aagum nu expect pannunga."
+  },
+  {
+    "text": "I still have about ten more minutes of my meeting left, so please ask the driver to wait a little longer.",
+    "category": "waiting_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "waiting"
+    ],
+    "tanglish_ref": "Enoda meeting innum pathu nimisham irukku, so driver konjam nera wait pannunga sollunga."
+  },
+  {
+    "text": "I know I'm taking longer than expected, so please let the driver know I'll add a little extra for the wait time.",
+    "category": "waiting_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "waiting"
+    ],
+    "tanglish_ref": "Naan expect pannadha vida nera edukkuren nu enakku theriyum, so wait time-ku konjam extra kudukuren nu driver-kitta sollunga."
+  },
+  {
+    "text": "The doctor hasn't called my number yet, so it might take another fifteen minutes before I come out.",
+    "category": "waiting_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "waiting"
+    ],
+    "tanglish_ref": "Doctor innum enoda number call pannala, so veliye varadhukku innum padhinaindhu nimisham aagalam."
+  },
+  {
+    "text": "Please don't cancel the ride yet, I'm just finishing up inside and I'll be out in five minutes.",
+    "category": "waiting_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "waiting"
+    ],
+    "tanglish_ref": "Ippodhaikku ride cancel pannadheenga, naan ulla vela mudichitu irukken, ainthu nimishathula veliye varen."
+  },
+  {
+    "text": "The driver has been waiting for a while now, so please hurry up and come down as soon as possible.",
+    "category": "waiting_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "waiting"
+    ],
+    "tanglish_ref": "Driver nallaave neram wait pannitu irukaru, so fast-a veliye vaanga mudinjavarai."
+  },
+  {
+    "text": "I got stuck in a long queue at billing, so it'll take a bit more time than I originally told you.",
+    "category": "waiting_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "waiting"
+    ],
+    "tanglish_ref": "Naan billing-la neriya queue-la sikkitten, so naan mudhalla sonna time vida konjam nera aagum."
+  },
+  {
+    "text": "Since the flight got delayed by an hour, please tell the driver he doesn't need to wait right now.",
+    "category": "waiting_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "waiting"
+    ],
+    "tanglish_ref": "Flight oru mani neram delay aagirathunaala, driver ippo wait pannanum nu venaam nu sollunga."
+  },
+  {
+    "text": "I'm sorry for the delay, my previous meeting overran and I couldn't step out any earlier than this.",
+    "category": "waiting_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "waiting"
+    ],
+    "tanglish_ref": "Delay-kku sorry, enoda mudhal meeting nera edithukiduchu, adhukku munnadi naan veliye varamudiyala."
+  },
+  {
+    "text": "Since the road is completely flooded near the underpass, could you take an alternate route to avoid it?",
+    "category": "weather_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "weather"
+    ],
+    "tanglish_ref": "Underpass pakkathula road completely flood aayirukurathunaala, adha avoid panna alternate route edunga."
+  },
+  {
+    "text": "I know this is a bit of a strange request, but could you please turn off the AC for a few minutes, since one of the passengers just got a bit too cold?",
+    "category": "in_car_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "in_car"
+    ],
+    "tanglish_ref": "Idhu konjam strange request nu enakku theriyum, aana konja neramaachum AC-a off pannunga, passenger onnu konjam over-a cold aayirukku."
+  },
+  {
+    "text": "Brother, I know the meter is showing a different amount, but the app already confirmed a fixed price for this trip, so please go by that instead.",
+    "category": "payment_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "payment"
+    ],
+    "tanglish_ref": "Anna, meter-la vera amount kaattuthu nu enakku theriyum, aana app already indha trip-ku fixed price confirm pannitrukku, so andha price-a follow pannunga."
+  },
+  {
+    "text": "Brother, before you start the meter, could you confirm once whether you're taking the flyover or the ground route, since the fare changes depending on that?",
+    "category": "payment_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "payment"
+    ],
+    "tanglish_ref": "Anna, meter start pannadhukku munnadi, flyover-a edukkardhu illa ground route-a edukkardhu nu oru thadava confirm pannunga, adha vachu fare change aagum."
+  },
+  {
+    "text": "Uncle, I can see three cars matching that description near the gate, so could you flash your indicator once so I know which one is yours?",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Uncle, gate pakkathula sonna description-ku match aagura moonu car-a naan paakuren, so unga vandi edhu nu theriyuradhukku oru thadava indicator flash pannunga."
+  },
+  {
+    "text": "Brother, please don't take the route the app is showing right now, since there's a religious procession blocking that entire street for the next hour.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Anna, app sollara route-a follow pannadheenga, andha street-a procession-nala adutha oru mani neramukku block pannirukanga."
+  },
+  {
+    "text": "Brother, I noticed the fuel gauge is showing quite low, so if you need to stop at a petrol bunk on the way, please let me know in advance so I'm not surprised by the delay.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Anna, fuel gauge romba kammi-a kaattura maadhiri paakuren, so vazhila petrol bunk-la nikkanum na, munnadiye sollunga, delay-a paathu naan surprise aagama irukalam."
+  },
+  {
+    "text": "Brother, since it's already quite late and the streets are mostly empty, would it be okay to skip the usual route and take the highway instead, just to save some time?",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Anna, already romba raathiri aayidichu, streets-um mostly empty-a irukku, so usual route-a skip pannitu highway-a edukalama, konjam time save aagum."
+  },
+  {
+    "text": "Brother, I understand the bridge road is faster, but my stomach isn't doing too well today, so please avoid the bumpy stretch even if it takes a couple of minutes longer.",
+    "category": "directions_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "directions"
+    ],
+    "tanglish_ref": "Anna, bridge road fast-a irukum nu enakku theriyum, aana enakku indha naeku vayitru romba correct-a illa, so rendu nimisham nera aanaalum andha bumpy stretch-a avoid pannunga."
+  },
+  {
+    "text": "Please wait near the main gate.",
+    "category": "pickup_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "pickup"
+    ],
+    "tanglish_ref": "Main gate pakkathula wait pannunga."
+  },
+  {
+    "text": "I received the OTP a few seconds ago, but I want to confirm the vehicle number before sharing it.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "natural"
+    ],
+    "tanglish_ref": "Enakku sila seconds-ku munnadi OTP vandhuduchu, share pannuradhuku munnadi vehicle number correct vehicle dhaana-nu confirm pannikanum."
+  },
+  {
+    "text": "I left my phone charger in the back seat after completing the ride, so please contact the driver and ask him to check.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "natural"
+    ],
+    "tanglish_ref": "Thappudhala en phone charger-a back seat-la vittuten, so driver-a contact panni adha check panna sollunga."
+  },
+  {
+    "text": "There is heavy traffic near the signal, and the map is showing that our arrival time has increased by fifteen minutes.",
+    "category": "natural_tanglish_gold",
+    "language_mix": "tanglish",
+    "stress": [
+      "gold_pair",
+      "natural"
+    ],
+    "tanglish_ref": "Signal kitta romba traffic irukku, so map-la arrival time innum fifteen minutes-ku mela aagalam."
   }
 ]

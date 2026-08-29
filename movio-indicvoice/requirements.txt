@@ -38,9 +38,15 @@ jiwer>=3.0.0
 openai-whisper>=20231117
 qrcode>=7.4
 transformers>=4.38.0
+pyyaml>=6.0
+# Optional for YouTube discovery/download (install separately if needed):
+#   pip install yt-dlp
 accelerate>=0.27.0
 sentencepiece>=0.1.99
 protobuf>=4.25.0
 websockets>=12.0
 pydantic>=2.6.0
+pyyaml>=6.0
+# Optional for YouTube discovery/download (install separately if needed):
+#   pip install yt-dlp
 # IndicF5: install from git (see header comments)

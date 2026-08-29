@@ -51,7 +51,7 @@
     .dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; display: inline-block; background: var(--bad); margin-right: 0.35rem; }
     .dot.on { background: var(--ok); }
     .dot.warn { background: var(--warn); }
-    select {
+    select, .mode-btn {
       width: 100%;
       margin-top: 0.25rem;
       padding: 0.55rem;
@@ -61,6 +61,19 @@
       color: var(--ink);
       font: inherit;
     }
+    .mode-row { display: flex; gap: 0.4rem; margin-top: 0.5rem; }
+    .mode-row button {
+      flex: 1;
+      padding: 0.45rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #0c1218;
+      color: var(--mute);
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .mode-row button.on { background: var(--accent); color: #041018; border-color: var(--accent); }
     .hold {
       width: 100%;
       margin-top: 0.75rem;
@@ -78,6 +91,7 @@
     }
     .hold:disabled { opacity: 0.45; }
     .hold.active { background: var(--bad); color: #fff; }
+    .hold.listening { background: #2d6a4f; color: #fff; }
     .msg {
       margin-top: 0.75rem;
       font-size: 0.85rem;
@@ -96,18 +110,27 @@
       color: var(--ink);
       font: inherit;
     }
+    .fsm {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.72rem;
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Voice Translation</h1>
     <div class="role" id="roleLabel">PHONE —</div>
+    <div class="fsm" id="fsmLabel">FSM: IDLE</div>
 
     <div class="card">
       <div class="row"><span class="label">Status</span><span id="status"><span class="dot"></span>Connecting…</span></div>
       <div class="row"><span class="label">Partner</span><span id="partner">—</span></div>
       <div class="row"><span class="label">Microphone</span><span id="mic"><span class="dot"></span>Idle</span></div>
       <div class="row"><span class="label">Translated audio</span><span id="recv"><span class="dot"></span>Waiting</span></div>
+      <div class="row"><span class="label">Echo gate</span><span id="echo"><span class="dot"></span>Off</span></div>
     </div>
 
     <div class="card">
@@ -124,10 +147,16 @@
         <option value="ta">Tamil (ta)</option>
         <option value="en">English (en)</option>
       </select>
+      <div class="label" style="margin-top:0.65rem">Capture mode</div>
+      <div class="mode-row">
+        <button type="button" id="modeVad" class="on">Continuous VAD</button>
+        <button type="button" id="modePtt">Hold to speak</button>
+      </div>
     </div>
 
-    <button type="button" class="hold" id="holdBtn" disabled>HOLD TO SPEAK</button>
+    <button type="button" class="hold" id="holdBtn" disabled>ENABLE LISTENING</button>
     <button type="button" class="secondary" id="unlockBtn">Tap to enable microphone / audio</button>
+    <button type="button" class="secondary" id="retryBtn" style="display:none">Retry last utterance</button>
     <button type="button" class="secondary" id="playRecvBtn" style="display:none">Tap to play received audio</button>
     <audio id="recvAudio" playsinline webkit-playsinline></audio>
 
@@ -138,7 +167,6 @@
   <script>
     const params = new URLSearchParams(location.search);
     const parts = location.pathname.split("/").filter(Boolean);
-    // /test/SESSION/A
     const sessionId = parts[1];
     const role = (parts[2] || "").toUpperCase();
     const token = params.get("token") || "";
@@ -146,8 +174,6 @@
     const $ = (id) => document.getElementById(id);
     $("roleLabel").textContent = "PHONE " + role;
 
-    // Role presets (must match dashboard session create). Do NOT send these
-    // before hello — that used to overwrite server langs with wrong defaults.
     if (role === "A") {
       $("inLang").value = "en";
       $("outLang").value = "tanglish";
@@ -156,19 +182,51 @@
       $("outLang").value = "en";
     }
 
+    // --- Tunables (half-duplex reliability over latency) ---
+    const VAD_SPEECH_RMS = 0.018;
+    const VAD_BARGE_RMS = 0.045; // louder than echo to barge-in
+    const VAD_SILENCE_MS = 900;
+    const VAD_MIN_SPEECH_MS = 200;
+    const VAD_PREFIX_MS = 180;
+
     let ws = null;
     let connected = false;
     let mediaStream = null;
     let audioCtx = null;
     let processor = null;
     let sourceNode = null;
-    let recording = false;
+    let muteGain = null;
+    let continuous = false;
+    let mode = "vad"; // vad | ptt
+    let recording = false; // PTT active
     let pcmChunks = [];
     let sampleRate = 16000;
     let latencies = [];
     let playQueue = Promise.resolve();
     let audioUnlocked = false;
-    let pendingRecv = null; // { url, mime, text }
+    let pendingRecv = null;
+    let echoSuppress = false;
+    let fsmState = "IDLE";
+    let youMaySpeak = true;
+    let activePlayUtterance = null;
+    let currentAudioSrc = null;
+    let lastFailedUtteranceId = null;
+    let seenUtteranceIds = new Set();
+    let reconnectGeneration = 0;
+
+    // VAD state
+    let vadSpeaking = false;
+    let vadSpeechMs = 0;
+    let vadSilenceMs = 0;
+    let vadUtteranceId = null;
+    let vadStartTime = 0;
+    let vadRing = [];
+    let vadRingMs = 0;
+    let claimAccepted = false;
+
+    function uuidUtterance() {
+      return "utt-" + Math.random().toString(16).slice(2) + Date.now().toString(16).slice(-4);
+    }
 
     function setStatus(text, cls) {
       const dotCls = cls === "on" ? "on" : cls === "warn" ? "warn" : "";
@@ -180,9 +238,29 @@
     function setRecv(active) {
       $("recv").innerHTML = `<span class="dot ${active ? "on" : ""}"></span>${active ? "Receiving" : "Waiting"}`;
     }
+    function setEcho(on) {
+      echoSuppress = !!on;
+      $("echo").innerHTML = `<span class="dot ${on ? "warn" : ""}"></span>${on ? "ON (ignore TTS)" : "Off"}`;
+    }
+    function setFsm(state) {
+      fsmState = state || "IDLE";
+      $("fsmLabel").textContent = "FSM: " + fsmState;
+    }
     function message(text, err) {
       $("msg").textContent = text;
       $("msg").className = "msg" + (err ? " err" : "");
+    }
+    function updateHoldLabel() {
+      const btn = $("holdBtn");
+      if (mode === "ptt") {
+        btn.textContent = recording ? "RECORDING… RELEASE TO SEND" : "HOLD TO SPEAK";
+        btn.classList.toggle("active", recording);
+        btn.classList.remove("listening");
+      } else {
+        btn.textContent = continuous ? "LISTENING… (tap to pause)" : "ENABLE LISTENING";
+        btn.classList.toggle("listening", continuous);
+        btn.classList.toggle("active", vadSpeaking);
+      }
     }
 
     function b64ToUint8(b64) {
@@ -196,11 +274,10 @@
       const f = (fmt || "").toLowerCase();
       if (f === "mp3" || f === "mpeg" || f === "audio/mpeg") return "audio/mpeg";
       if (f === "wav" || f === "wave" || f === "audio/wav") return "audio/wav";
-      // Magic bytes
       if (bytes.length >= 3 && bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0) return "audio/mpeg";
       if (bytes.length >= 3 && bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) return "audio/mpeg";
       if (bytes.length >= 4 && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46) return "audio/wav";
-      return "audio/mpeg"; // edge_fast default
+      return "audio/mpeg";
     }
 
     async function unlockAudio() {
@@ -215,7 +292,6 @@
         src.connect(audioCtx.destination);
         src.start(0);
       } catch (_) {}
-      // Also prime HTMLAudioElement (needed on iOS/Chrome autoplay policy)
       try {
         const a = $("recvAudio");
         a.muted = true;
@@ -227,6 +303,29 @@
         a.load();
       } catch (_) {}
       audioUnlocked = true;
+    }
+
+    function stopLocalTts(reason) {
+      try {
+        const audio = $("recvAudio");
+        audio.pause();
+        audio.removeAttribute("src");
+        audio.load();
+      } catch (_) {}
+      if (currentAudioSrc) {
+        try { currentAudioSrc.stop(); } catch (_) {}
+        currentAudioSrc = null;
+      }
+      setRecv(false);
+      setEcho(false);
+      if (activePlayUtterance && ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({
+          type: reason === "failed" ? "tts_failed" : "tts_done",
+          utterance_id: activePlayUtterance,
+          reason: reason || "stopped",
+        }));
+      }
+      activePlayUtterance = null;
     }
 
     function playViaElement(url) {
@@ -248,7 +347,7 @@
         audio.load();
         const p = audio.play();
         if (p && typeof p.then === "function") {
-          p.then(() => { /* playing */ }).catch((err) => done(false, err));
+          p.then(() => {}).catch((err) => done(false, err));
         }
       });
     }
@@ -263,7 +362,8 @@
           const src = audioCtx.createBufferSource();
           src.buffer = decoded;
           src.connect(audioCtx.destination);
-          src.onended = () => resolve();
+          currentAudioSrc = src;
+          src.onended = () => { currentAudioSrc = null; resolve(); };
           src.start(0);
         } catch (err) {
           reject(err);
@@ -271,11 +371,11 @@
       });
     }
 
-    function showPlayFallback(url, mime, text) {
+    function showPlayFallback(url, mime, text, utteranceId) {
       if (pendingRecv && pendingRecv.url) {
         try { URL.revokeObjectURL(pendingRecv.url); } catch (_) {}
       }
-      pendingRecv = { url, mime, text };
+      pendingRecv = { url, mime, text, utteranceId };
       $("playRecvBtn").style.display = "block";
       message(
         (text ? text + "\n\n" : "") +
@@ -284,9 +384,20 @@
       );
     }
 
-    function playBase64Audio(b64, fmt, text) {
+    function playBase64Audio(b64, fmt, text, utteranceId) {
+      if (utteranceId && seenUtteranceIds.has(utteranceId + ":played") && reconnectGeneration > 0) {
+        // Avoid replaying stale audio after reconnect
+        message("Skipped stale TTS after reconnect.");
+        if (ws && ws.readyState === 1) {
+          ws.send(JSON.stringify({ type: "tts_done", utterance_id: utteranceId, reason: "stale_skipped" }));
+        }
+        return;
+      }
       if (!b64) {
-        message((text || "Partner speech") + "\n\n(No audio bytes received)", true);
+        message((text || "Partner speech") + "\n\n(No audio bytes — text only)", true);
+        if (ws && ws.readyState === 1 && utteranceId) {
+          ws.send(JSON.stringify({ type: "tts_failed", utterance_id: utteranceId }));
+        }
         return;
       }
       const bytes = b64ToUint8(b64);
@@ -298,22 +409,37 @@
       const blob = new Blob([bytes], { type: mime });
       const url = URL.createObjectURL(blob);
       setRecv(true);
+      setEcho(true);
+      activePlayUtterance = utteranceId || null;
+      if (utteranceId) seenUtteranceIds.add(utteranceId + ":played");
+      if (ws && ws.readyState === 1 && utteranceId) {
+        ws.send(JSON.stringify({ type: "tts_started", utterance_id: utteranceId }));
+      }
       playQueue = playQueue.then(async () => {
         try {
           await unlockAudio();
           try {
             await playViaElement(url);
           } catch (elErr) {
-            // Fallback: Web Audio API decode (works for mp3/wav on most phones)
             await playViaWebAudio(bytes);
           }
           $("playRecvBtn").style.display = "none";
           if (pendingRecv && pendingRecv.url === url) pendingRecv = null;
           else URL.revokeObjectURL(url);
           setRecv(false);
+          setEcho(false);
+          if (ws && ws.readyState === 1 && utteranceId) {
+            ws.send(JSON.stringify({ type: "tts_done", utterance_id: utteranceId }));
+          }
+          activePlayUtterance = null;
         } catch (err) {
           setRecv(false);
-          showPlayFallback(url, mime, text || "Partner speech");
+          setEcho(false);
+          showPlayFallback(url, mime, text || "Partner speech", utteranceId);
+          if (ws && ws.readyState === 1 && utteranceId) {
+            ws.send(JSON.stringify({ type: "tts_failed", utterance_id: utteranceId, error: String(err) }));
+          }
+          activePlayUtterance = null;
         }
       });
     }
@@ -344,9 +470,7 @@
       const ratio = inRate / 16000;
       const outLen = Math.floor(float32.length / ratio);
       const out = new Float32Array(outLen);
-      for (let i = 0; i < outLen; i++) {
-        out[i] = float32[Math.floor(i * ratio)];
-      }
+      for (let i = 0; i < outLen; i++) out[i] = float32[Math.floor(i * ratio)];
       return out;
     }
 
@@ -393,84 +517,28 @@
       return btoa(binary);
     }
 
-    async function startHold() {
-      if (recording || !connected) return;
-      try {
-        await ensureMic();
-        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === "suspended") await audioCtx.resume();
-        sampleRate = audioCtx.sampleRate;
-        sourceNode = audioCtx.createMediaStreamSource(mediaStream);
-        processor = audioCtx.createScriptProcessor(4096, 1, 1);
-        const mute = audioCtx.createGain();
-        mute.gain.value = 0;
-        pcmChunks = [];
-        processor.onaudioprocess = (e) => {
-          if (!recording) return;
-          const input = e.inputBuffer.getChannelData(0);
-          pcmChunks.push(new Float32Array(input));
-        };
-        sourceNode.connect(processor);
-        processor.connect(mute);
-        mute.connect(audioCtx.destination);
-        recording = true;
-        $("holdBtn").classList.add("active");
-        $("holdBtn").textContent = "RECORDING… RELEASE TO SEND";
-        setMic(true);
-        ws && ws.send(JSON.stringify({ type: "mic", active: true }));
-        message("Listening… release to translate.");
-      } catch (err) {
-        console.error(err);
-        message(
-          "Microphone permission is required.\n\nPlease allow microphone access\nand reload this page.\n\n" +
-            (err && err.message ? err.message : ""),
-          true
-        );
-        if (location.protocol === "http:" && location.hostname !== "localhost") {
-          message(
-            "Microphone permission is required.\n\nOn Chrome, LAN HTTP often blocks the mic.\n" +
-              "Options:\n1) Use Firefox, or\n2) Restart server with HTTPS:\n   python -m phone_test --https\n" +
-              "3) chrome://flags → Insecure origins treated as secure\n   add this page origin.\n\n" +
-              (err && err.message ? err.message : ""),
-            true
-          );
-        }
-      }
+    function rmsOf(float32) {
+      let s = 0;
+      for (let i = 0; i < float32.length; i++) s += float32[i] * float32[i];
+      return Math.sqrt(s / Math.max(1, float32.length));
     }
 
-    function stopHold() {
-      if (!recording) return;
-      recording = false;
-      $("holdBtn").classList.remove("active");
-      $("holdBtn").textContent = "HOLD TO SPEAK";
-      setMic(false);
-      try {
-        processor && processor.disconnect();
-        sourceNode && sourceNode.disconnect();
-      } catch (_) {}
-      processor = null;
-      sourceNode = null;
-      ws && ws.send(JSON.stringify({ type: "mic", active: false }));
-
-      if (!pcmChunks.length) {
+    function sendUtteranceFromChunks(chunks, utteranceId, startTime) {
+      if (!chunks.length) {
         message("No audio captured.", true);
         return;
       }
       let total = 0;
-      for (const c of pcmChunks) total += c.length;
+      for (const c of chunks) total += c.length;
       const merged = new Float32Array(total);
       let off = 0;
-      for (const c of pcmChunks) {
-        merged.set(c, off);
-        off += c.length;
-      }
+      for (const c of chunks) { merged.set(c, off); off += c.length; }
       const down = downsampleTo16k(merged, sampleRate);
       const pcm16 = floatTo16BitPCM(down);
       const wav = encodeWav(pcm16, 16000);
       const audio_b64 = b64FromArrayBuffer(wav);
-      message("Sending audio to laptop…");
+      message("Sending utterance " + utteranceId + "…");
       ensureCrossLang();
-      // Re-assert langs on every utterance so dropdown changes always apply
       if (ws && ws.readyState === 1) {
         ws.send(JSON.stringify({
           type: "lang",
@@ -479,6 +547,8 @@
         }));
         ws.send(JSON.stringify({
           type: "audio_utterance",
+          utterance_id: utteranceId,
+          start_time: startTime || (Date.now() / 1000),
           mime: "audio/wav",
           sample_rate: 16000,
           audio_b64,
@@ -488,6 +558,183 @@
       }
     }
 
+    function pushRing(frame, frameMs) {
+      vadRing.push(frame);
+      vadRingMs += frameMs;
+      while (vadRingMs > VAD_PREFIX_MS + 40 && vadRing.length > 1) {
+        const dropped = vadRing.shift();
+        vadRingMs -= (dropped.length / sampleRate) * 1000;
+      }
+    }
+
+    function onVadFrame(input) {
+      const frame = new Float32Array(input);
+      const frameMs = (frame.length / sampleRate) * 1000;
+      const energy = rmsOf(frame);
+
+      // Echo gate: ignore soft energy while TTS plays; loud = barge-in
+      if (echoSuppress) {
+        pushRing(frame, frameMs);
+        if (energy >= VAD_BARGE_RMS) {
+          const uid = uuidUtterance();
+          stopLocalTts("barge_in");
+          if (ws && ws.readyState === 1) {
+            ws.send(JSON.stringify({ type: "barge_in", utterance_id: uid }));
+          }
+          vadSpeaking = true;
+          vadUtteranceId = uid;
+          vadStartTime = Date.now() / 1000;
+          vadSpeechMs = 0;
+          vadSilenceMs = 0;
+          pcmChunks = vadRing.map((c) => new Float32Array(c));
+          claimAccepted = true;
+          setMic(true);
+          message("Barge-in — TTS stopped. Listening…");
+          updateHoldLabel();
+        }
+        return;
+      }
+
+      if (!youMaySpeak && !vadSpeaking && fsmState !== "IDLE" && !String(fsmState).startsWith("LISTENING_" + role)) {
+        // Floor held by partner — still detect overlap for logging
+        if (energy >= VAD_SPEECH_RMS) {
+          const uid = uuidUtterance();
+          if (ws && ws.readyState === 1) {
+            ws.send(JSON.stringify({ type: "speech_start", utterance_id: uid }));
+          }
+        }
+        return;
+      }
+
+      pushRing(frame, frameMs);
+
+      if (!vadSpeaking) {
+        if (energy >= VAD_SPEECH_RMS) {
+          const uid = uuidUtterance();
+          vadSpeaking = true;
+          vadUtteranceId = uid;
+          vadStartTime = Date.now() / 1000;
+          vadSpeechMs = 0;
+          vadSilenceMs = 0;
+          pcmChunks = vadRing.map((c) => new Float32Array(c));
+          claimAccepted = false;
+          setMic(true);
+          updateHoldLabel();
+          if (ws && ws.readyState === 1) {
+            ws.send(JSON.stringify({ type: "speech_start", utterance_id: uid }));
+            ws.send(JSON.stringify({ type: "mic", active: true }));
+          }
+          message("Speech detected — keep talking; pause to send.");
+        }
+        return;
+      }
+
+      // In utterance
+      pcmChunks.push(frame);
+      if (energy >= VAD_SPEECH_RMS * 0.7) {
+        vadSpeechMs += frameMs;
+        vadSilenceMs = 0;
+      } else {
+        vadSilenceMs += frameMs;
+      }
+
+      if (vadSilenceMs >= VAD_SILENCE_MS && vadSpeechMs >= VAD_MIN_SPEECH_MS) {
+        finalizeVadUtterance();
+      }
+    }
+
+    function finalizeVadUtterance() {
+      if (!vadSpeaking) return;
+      const uid = vadUtteranceId || uuidUtterance();
+      const start = vadStartTime;
+      const chunks = pcmChunks.slice();
+      vadSpeaking = false;
+      vadUtteranceId = null;
+      pcmChunks = [];
+      vadSpeechMs = 0;
+      vadSilenceMs = 0;
+      setMic(false);
+      updateHoldLabel();
+      if (ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: "mic", active: false }));
+      }
+      if (!claimAccepted && fsmState === "OVERLAP") {
+        message("Overlap — your speech was flagged as interruption.", true);
+        return;
+      }
+      sendUtteranceFromChunks(chunks, uid, start);
+    }
+
+    async function startContinuous() {
+      if (continuous) return;
+      await ensureMic();
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") await audioCtx.resume();
+      sampleRate = audioCtx.sampleRate;
+      if (!processor) {
+        sourceNode = audioCtx.createMediaStreamSource(mediaStream);
+        processor = audioCtx.createScriptProcessor(4096, 1, 1);
+        muteGain = audioCtx.createGain();
+        muteGain.gain.value = 0;
+        processor.onaudioprocess = (e) => {
+          if (!continuous && !recording) return;
+          const input = e.inputBuffer.getChannelData(0);
+          if (mode === "vad" && continuous) onVadFrame(input);
+          else if (mode === "ptt" && recording) pcmChunks.push(new Float32Array(input));
+        };
+        sourceNode.connect(processor);
+        processor.connect(muteGain);
+        muteGain.connect(audioCtx.destination);
+      }
+      continuous = true;
+      updateHoldLabel();
+      message("Continuous listening on. Speak naturally; pause ~1s to finalize.");
+    }
+
+    function stopContinuous() {
+      if (vadSpeaking) finalizeVadUtterance();
+      continuous = false;
+      updateHoldLabel();
+      message("Listening paused.");
+    }
+
+    async function startHold() {
+      if (mode !== "ptt" || recording || !connected) return;
+      try {
+        await ensureMic();
+        if (!continuous) await startContinuous();
+        pcmChunks = [];
+        recording = true;
+        const uid = uuidUtterance();
+        vadUtteranceId = uid;
+        vadStartTime = Date.now() / 1000;
+        updateHoldLabel();
+        setMic(true);
+        if (ws && ws.readyState === 1) {
+          ws.send(JSON.stringify({ type: "speech_start", utterance_id: uid }));
+          ws.send(JSON.stringify({ type: "mic", active: true }));
+        }
+        message("Listening… release to translate.");
+      } catch (err) {
+        console.error(err);
+        message("Microphone permission is required.\n\n" + (err && err.message ? err.message : ""), true);
+      }
+    }
+
+    function stopHold() {
+      if (mode !== "ptt" || !recording) return;
+      recording = false;
+      updateHoldLabel();
+      setMic(false);
+      if (ws && ws.readyState === 1) ws.send(JSON.stringify({ type: "mic", active: false }));
+      const uid = vadUtteranceId || uuidUtterance();
+      const start = vadStartTime;
+      const chunks = pcmChunks.slice();
+      pcmChunks = [];
+      vadUtteranceId = null;
+      sendUtteranceFromChunks(chunks, uid, start);
+    }
+
     function connect() {
       setStatus("Connecting…", "warn");
       ws = new WebSocket(wsUrl());
@@ -495,13 +742,15 @@
         connected = true;
         setStatus("Connected", "on");
         $("holdBtn").disabled = false;
-        message("Connected. Hold the button to speak.");
+        message("Connected. Enable listening, then speak.");
       };
       ws.onclose = () => {
         connected = false;
+        reconnectGeneration += 1;
+        stopLocalTts("disconnect");
         setStatus("Reconnecting…", "warn");
         $("holdBtn").disabled = true;
-        message("Disconnected from server. Reconnecting…", true);
+        message("Disconnected. Session state kept — reconnecting without replaying stale audio…", true);
         setTimeout(connect, 1500);
       };
       ws.onerror = () => message("WebSocket error", true);
@@ -511,56 +760,107 @@
           $("partner").textContent = "PHONE " + msg.partner + (msg.partner_connected ? " (online)" : " (offline)");
           if (msg.input_lang) $("inLang").value = msg.input_lang;
           if (msg.output_lang) $("outLang").value = msg.output_lang;
+          if (msg.fsm && msg.fsm.fsm_state) setFsm(msg.fsm.fsm_state);
           ensureCrossLang();
           sendLang();
           message(
-            "Connected. You speak " + $("inLang").value +
-            "; partner hears " + $("outLang").value + ".\nHold the button to speak."
+            "Half-duplex mode. You speak " + $("inLang").value +
+            "; partner hears " + $("outLang").value + ".\nEnable listening to start."
           );
           if (msg.stt && !msg.stt.ready) {
             message("STT loading on laptop: " + (msg.stt.error || "please wait"), true);
           }
         }
+        if (msg.type === "session_state") {
+          setFsm(msg.fsm_state || msg.phase);
+          youMaySpeak = msg.you_may_speak !== false;
+          setEcho(!!msg.echo_suppress);
+        }
+        if (msg.type === "speech_ack") {
+          claimAccepted = msg.claim === "ACCEPTED" || msg.claim === "BARGE_IN";
+          if (msg.claim === "OVERLAP_REJECTED") {
+            message("Overlap: partner started first — your turn flagged as interruption.", true);
+            vadSpeaking = false;
+            pcmChunks = [];
+            setMic(false);
+            updateHoldLabel();
+          } else if (msg.claim === "ECHO_SUPPRESSED") {
+            message("Echo suppressed (heard translated TTS).", true);
+            vadSpeaking = false;
+            pcmChunks = [];
+          } else if (msg.claim === "BUSY") {
+            message("Partner turn in progress — wait for IDLE.", true);
+            vadSpeaking = false;
+            pcmChunks = [];
+          }
+          if (msg.fsm_state) setFsm(msg.fsm_state);
+        }
+        if (msg.type === "overlap") {
+          message(msg.detail || "Overlap detected", true);
+        }
+        if (msg.type === "stop_tts") {
+          stopLocalTts("barge_in");
+          message("TTS interrupted (barge-in).");
+        }
         if (msg.type === "lang") {
           if (msg.input_lang) $("inLang").value = msg.input_lang;
           if (msg.output_lang) $("outLang").value = msg.output_lang;
-          message(
-            "Languages updated. You speak " + $("inLang").value +
-            "; partner hears " + $("outLang").value + "."
-          );
         }
         if (msg.type === "status") {
+          if (msg.fsm_state) setFsm(msg.fsm_state);
           if (msg.phase === "processing") message("Processing on laptop…");
           if (msg.phase === "partner_speaking") setRecv(true);
-          if (msg.phase === "idle") { /* keep */ }
         }
         if (msg.type === "tts_audio") {
-          playBase64Audio(msg.audio_b64, msg.audio_format || "wav");
+          playBase64Audio(
+            msg.audio_b64,
+            msg.audio_format || "wav",
+            msg.translated_text || msg.normalized_text || "",
+            msg.utterance_id
+          );
           message("Partner speech:\n" + (msg.translated_text || msg.normalized_text || ""));
+        }
+        if (msg.type === "tts_failed") {
+          $("retryBtn").style.display = "block";
+          lastFailedUtteranceId = msg.utterance_id || lastFailedUtteranceId;
+          message(
+            "TTS failed — translated text:\n" + (msg.translated_text || "") +
+            "\n\nTap Retry to resynthesize.",
+            true
+          );
+        }
+        if (msg.type === "utterance_text") {
+          message("Partner (text only):\n" + (msg.transcript || msg.detail || ""));
         }
         if (msg.type === "utterance_result") {
           if (msg.ok) {
             latencies.push(msg.latency_sec);
             const avg = latencies.reduce((a, b) => a + b, 0) / latencies.length;
             $("lat").textContent =
-              `Last translation latency: ${msg.latency_sec.toFixed(2)}s\n` +
-              `Average latency: ${avg.toFixed(2)}s\n` +
-              `STT ${msg.stt_ms}ms · Translate+TTS ${msg.pipeline_ms}ms`;
+              `Last: ${msg.latency_sec.toFixed(2)}s · avg ${avg.toFixed(2)}s\n` +
+              `STT ${msg.stt_ms}ms · Translate+TTS ${msg.pipeline_ms}ms\n` +
+              `id ${msg.utterance_id || ""} · ${msg.source_language || ""} → ${msg.target_lang || ""}`;
             message(
               "You said:\n" + msg.source_text +
               "\n\nPartner heard (" + (msg.target_lang || $("outLang").value) + "):\n" +
               msg.translated_text
             );
+            $("retryBtn").style.display = "none";
           } else {
-            message("Failed: " + (msg.error || "unknown"), true);
+            lastFailedUtteranceId = msg.utterance_id || lastFailedUtteranceId;
+            if (msg.retryable) $("retryBtn").style.display = "block";
+            message(
+              "Failed: " + (msg.error || "unknown") +
+              (msg.transcript ? ("\n\nPreserved ASR:\n" + msg.transcript) : ""),
+              true
+            );
           }
         }
-        if (msg.type === "replaced") {
-          message(msg.detail || "Connection replaced", true);
-        }
+        if (msg.type === "replaced") message(msg.detail || "Connection replaced", true);
         if (msg.type === "session_ended") {
           message("Session ended on laptop.", true);
           setStatus("Disconnected", "");
+          stopContinuous();
         }
         if (msg.type === "error") message(msg.detail || "error", true);
       };
@@ -574,50 +874,87 @@
         input_lang: $("inLang").value,
         output_lang: $("outLang").value,
       }));
-      message(
-        "You speak " + $("inLang").value +
-        "; partner hears " + $("outLang").value + "."
-      );
     }
 
-    /** Never leave both sides on the same language (that causes English passthrough). */
     function ensureCrossLang() {
       const inn = ($("inLang").value || "").toLowerCase();
       const out = ($("outLang").value || "").toLowerCase();
       const inEn = inn === "en" || inn === "auto";
       const inTa = inn === "ta" || inn === "tanglish";
-      if (out === "en" && inEn) {
-        $("outLang").value = "tanglish";
-      } else if ((out === "ta" || out === "tanglish") && inTa) {
-        $("outLang").value = "en";
-      }
+      if (out === "en" && inEn) $("outLang").value = "tanglish";
+      else if ((out === "ta" || out === "tanglish") && inTa) $("outLang").value = "en";
     }
 
     $("inLang").onchange = sendLang;
     $("outLang").onchange = sendLang;
-    $("inLang").oninput = sendLang;
-    $("outLang").oninput = sendLang;
+
+    $("modeVad").onclick = () => {
+      mode = "vad";
+      $("modeVad").classList.add("on");
+      $("modePtt").classList.remove("on");
+      updateHoldLabel();
+    };
+    $("modePtt").onclick = () => {
+      mode = "ptt";
+      if (vadSpeaking) finalizeVadUtterance();
+      $("modePtt").classList.add("on");
+      $("modeVad").classList.remove("on");
+      updateHoldLabel();
+    };
 
     const btn = $("holdBtn");
-    btn.addEventListener("pointerdown", (e) => { e.preventDefault(); startHold(); });
-    btn.addEventListener("pointerup", (e) => { e.preventDefault(); stopHold(); });
-    btn.addEventListener("pointercancel", (e) => { e.preventDefault(); stopHold(); });
-    btn.addEventListener("pointerleave", (e) => { if (recording) stopHold(); });
+    btn.addEventListener("pointerdown", async (e) => {
+      e.preventDefault();
+      if (mode === "ptt") startHold();
+      else {
+        try {
+          if (!continuous) await startContinuous();
+          else stopContinuous();
+        } catch (err) {
+          message(String(err && err.message || err), true);
+        }
+      }
+    });
+    btn.addEventListener("pointerup", (e) => { e.preventDefault(); if (mode === "ptt") stopHold(); });
+    btn.addEventListener("pointercancel", (e) => { e.preventDefault(); if (mode === "ptt") stopHold(); });
+    btn.addEventListener("pointerleave", (e) => { if (mode === "ptt" && recording) stopHold(); });
 
     $("unlockBtn").onclick = async () => {
       try {
         await ensureMic();
-        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-        await audioCtx.resume();
-        // Unlock playback with silent buffer
-        const buf = audioCtx.createBuffer(1, 1, 22050);
-        const src = audioCtx.createBufferSource();
-        src.buffer = buf;
-        src.connect(audioCtx.destination);
-        src.start(0);
+        await unlockAudio();
         message("Microphone and audio unlocked.");
       } catch (err) {
-        message("Microphone permission is required.\n\nPlease allow microphone access\nand reload this page.", true);
+        message("Microphone permission is required.", true);
+      }
+    };
+
+    $("retryBtn").onclick = () => {
+      if (!lastFailedUtteranceId || !ws || ws.readyState !== 1) return;
+      ws.send(JSON.stringify({ type: "retry_utterance", utterance_id: lastFailedUtteranceId }));
+      message("Retrying utterance " + lastFailedUtteranceId + "…");
+    };
+
+    $("playRecvBtn").onclick = async () => {
+      if (!pendingRecv) return;
+      try {
+        await unlockAudio();
+        activePlayUtterance = pendingRecv.utteranceId || null;
+        setEcho(true);
+        setRecv(true);
+        if (ws && ws.readyState === 1 && activePlayUtterance) {
+          ws.send(JSON.stringify({ type: "tts_started", utterance_id: activePlayUtterance }));
+        }
+        await playViaElement(pendingRecv.url);
+        $("playRecvBtn").style.display = "none";
+        setRecv(false);
+        setEcho(false);
+        if (ws && ws.readyState === 1 && activePlayUtterance) {
+          ws.send(JSON.stringify({ type: "tts_done", utterance_id: activePlayUtterance }));
+        }
+        activePlayUtterance = null;
+      } catch (err) {
+        message("Still blocked: " + err, true);
       }
     };
 

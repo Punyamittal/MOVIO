@@ -60,6 +60,54 @@ class TestValidatorCatchesReportedBug(unittest.TestCase):
         report = validate_translation(source, good)
         self.assertTrue(report.ok, report.flags)
 
+    def test_rejects_tamil_script_gloss(self):
+        source = (
+            "I know this is a bit of a strange request, but could you please "
+            "turn off the AC for a few minutes, since one of the passengers "
+            "just got a bit too cold?"
+        )
+        bad = (
+            "நான் know இது is a bit உடைய a strange request, ஆனா could நீங்க "
+            "தயவுசெய்து turn விட்டு the AC for a few நிமிடம், இருந்து one "
+            "passengers just got a bit too cold?"
+        )
+        report = validate_translation(source, bad)
+        self.assertFalse(report.ok)
+        self.assertIn("tamil_script_mixed", report.hard_flags)
+
+    def test_exact_gold_ac_off_passenger_cold(self):
+        clear_cache()
+        src = (
+            "I know this is a bit of a strange request, but could you please "
+            "turn off the AC for a few minutes, since one of the passengers "
+            "just got a bit too cold?"
+        )
+        gold = exact_gold(src)
+        self.assertIsNotNone(gold)
+        assert gold is not None
+        self.assertIn("ac-a off pannunga", gold.lower())
+        self.assertIn("strange request nu enakku theriyum", gold.lower())
+        r = translate(src, "tanglish")
+        self.assertEqual(r.engine, "gold")
+
+    def test_exact_gold_meter_fixed_price(self):
+        clear_cache()
+        src = (
+            "Brother, I know the meter is showing a different amount, but the app "
+            "already confirmed a fixed price for this trip, so please go by that "
+            "instead."
+        )
+        gold = exact_gold(src)
+        self.assertIsNotNone(gold)
+        assert gold is not None
+        self.assertIn("anna", gold.lower())
+        self.assertIn("kaattuthu", gold.lower())
+        self.assertIn("confirm pannitrukku", gold.lower())
+        self.assertIn("follow pannunga", gold.lower())
+        self.assertNotIn("aadha", gold.lower())
+        r = translate(src, "tanglish")
+        self.assertEqual(r.engine, "gold")
+
     def test_otp_must_preserve_digits(self):
         report = validate_translation("The OTP is 4821.", "OTP 7392.")
         self.assertFalse(report.ok)
@@ -117,6 +165,45 @@ class TestStatelessPrompt(unittest.TestCase):
         # Different inputs must produce different retrieval sets — otherwise
         # previous-turn residue is sneaking into few-shot selection.
         self.assertNotEqual(a, b)
+
+    def test_exact_gold_waiting_outside_security_gate(self):
+        gold = exact_gold(
+            "I am waiting outside the building near the security gate, "
+            "so please ask the driver to come here."
+        )
+        self.assertIsNotNone(gold)
+        self.assertIn("kitta", gold.lower())
+        self.assertIn("vara sollung", gold.lower())
+        self.assertNotIn("aappa", gold.lower())
+        self.assertNotIn("buildi ngil", gold.lower())
+
+    def test_exact_gold_driver_wrong_entrance(self):
+        gold = exact_gold(
+            "The driver has arrived, but he is waiting near the wrong entrance."
+        )
+        self.assertIsNotNone(gold)
+        self.assertIn("pakathule vandhutaru", gold.lower())
+        self.assertIn("thappana entrance-le wait pannuraru", gold.lower())
+
+    def test_exact_gold_two_entrances_confirm_side(self):
+        clear_cache()
+        src = (
+            "I'm currently standing near the security gate outside the apartment "
+            "complex, but since there are two entrances on this road, please ask "
+            "the driver to confirm which side he's coming from before he gets "
+            "confused and goes to the wrong gate."
+        )
+        gold = exact_gold(src)
+        self.assertIsNotNone(gold)
+        self.assertIn("rendu entrance", gold.lower())
+        self.assertIn("thappu gate-ku", gold.lower())
+        self.assertIn("eppadi vara pora nu confirm pannunga", gold.lower())
+        self.assertNotIn("confirm kanna", gold.lower())
+        self.assertNotIn("entrance-uda", gold.lower())
+
+        r = translate(src, "tanglish")
+        self.assertEqual(r.engine, "gold")
+        self.assertEqual(r.text, gold)
 
     def test_exact_gold_is_instant(self):
         # Prefer a known gold pair if present; otherwise skip.

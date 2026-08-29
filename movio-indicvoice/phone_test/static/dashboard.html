@@ -173,7 +173,7 @@
 <body>
   <div class="chrome-title">
   <h1>Two-Phone Test Environment</h1>
-  <p class="sub">Laptop hub · real STT → translate → TTS pipeline</p>
+  <p class="sub">Laptop hub · half-duplex STT → translate → TTS · echo-safe</p>
   </div>
   <div id="banner" class="banner">Starting session…</div>
 
@@ -189,6 +189,7 @@
   <div class="panel">
     <h3>Session</h3>
     <div id="sessionMeta">—</div>
+    <div id="fsmMeta" style="margin-top:0.5rem;font-family:ui-monospace,Consolas,monospace;font-size:0.82rem;color:var(--accent)">FSM: IDLE</div>
   </div>
 
   <div class="grid">
@@ -261,9 +262,15 @@
       }
       const err = u.error ? `\nError: ${u.error}` : "";
       el.innerHTML = `
-        <div><strong>Last text:</strong> ${escapeHtml(u.source_text || "")}</div>
-        <div><strong>Translation:</strong> ${escapeHtml(u.translated_text || "")}</div>
-        <div><strong>Latency:</strong> ${u.latency_sec}s · avg ${avg}s</div>
+        <div><strong>id:</strong> ${escapeHtml(u.utterance_id || "—")} · <strong>status:</strong> ${escapeHtml(u.processing_status || "—")}</div>
+        <div><strong>langs:</strong> ${escapeHtml(u.source_language || "?")} → ${escapeHtml(u.target_language || "?")}
+          ${u.lang_uncertain ? " · UNCERTAIN" : ""}
+          ${u.translation_skipped ? " · skip-translate" : ""}
+          ${u.interruption ? " · interruption" : ""}</div>
+        <div><strong>Transcript:</strong> ${escapeHtml(u.transcript || u.source_text || "")}</div>
+        <div><strong>Normalized:</strong> ${escapeHtml(u.normalized_text || "")}</div>
+        <div><strong>Translation:</strong> ${escapeHtml(u.translation || u.translated_text || "")}</div>
+        <div><strong>Latency:</strong> ${u.latency_sec}s · avg ${avg}s · retries ${u.retry_count || 0}</div>
         ${err ? `<div style="color:var(--bad)">${escapeHtml(err)}</div>` : ""}
       `;
     }
@@ -345,6 +352,12 @@
       const finalB = `${host}/test/${state.session_id}/B?token=${state.token_b}`;
 
       $("sessionMeta").textContent = `SESSION ${state.session_id} · expires ${new Date(state.expires_at * 1000).toLocaleTimeString()}`;
+      const fsm = state.fsm || {};
+      $("fsmMeta").textContent =
+        `FSM: ${state.fsm_state || fsm.fsm_state || "IDLE"}` +
+        (fsm.active_speaker ? ` · speaker=${fsm.active_speaker}` : "") +
+        (fsm.active_utterance_id ? ` · ${fsm.active_utterance_id}` : "") +
+        (fsm.tts_target ? ` · TTS→${fsm.tts_target}` : "");
       $("urlA").textContent = finalA;
       $("urlB").textContent = finalB;
       drawQr($("qrA"), finalA, $("qrLoadA"));
@@ -352,8 +365,8 @@
 
       const a = state.phone_a;
       const b = state.phone_b;
-      $("statusA").innerHTML = `<span class="dot ${a.connected ? "on" : ""}"></span> Connected: ${a.connected ? "Yes" : "No"}`;
-      $("statusB").innerHTML = `<span class="dot ${b.connected ? "on" : ""}"></span> Connected: ${b.connected ? "Yes" : "No"}`;
+      $("statusA").innerHTML = `<span class="dot ${a.connected ? "on" : ""}"></span> Connected: ${a.connected ? "Yes" : "No"}${a.echo_suppress ? " · echo gate" : ""}${a.receiving ? " · TTS" : ""}`;
+      $("statusB").innerHTML = `<span class="dot ${b.connected ? "on" : ""}"></span> Connected: ${b.connected ? "Yes" : "No"}${b.echo_suppress ? " · echo gate" : ""}${b.receiving ? " · TTS" : ""}`;
       $("langA").textContent = `Language: ${a.input_lang} → ${a.output_lang}`;
       $("langB").textContent = `Language: ${b.input_lang} → ${b.output_lang}`;
 
@@ -361,17 +374,22 @@
       renderUtter($("baBox"), state.last_ba, state.avg_latency_ba);
 
       $("audioMeta").textContent =
-        `A → B: ${a.mic_active ? "● Active (mic)" : "○ Idle"} · ` +
-        `B → A: ${b.mic_active ? "● Active (mic)" : "○ Idle"} · ` +
+        `A mic: ${a.mic_active ? "●" : "○"} · B mic: ${b.mic_active ? "●" : "○"} · ` +
+        `echo A/B: ${a.echo_suppress ? "ON" : "off"}/${b.echo_suppress ? "ON" : "off"} · ` +
         `Avg A→B ${state.avg_latency_ab}s · Avg B→A ${state.avg_latency_ba}s`;
 
+      const transitions = (fsm.recent_transitions || [])
+        .map((t) => `${t.from}→${t.to}${t.reason ? "(" + t.reason + ")" : ""}`)
+        .join(" · ");
       const log = (state.event_log || [])
-        .map((e) => `[${e.iso}] ${e.message}${e.latency_sec != null ? "  latency=" + e.latency_sec + "s" : ""}`)
+        .map((e) => `[${e.iso}] ${e.message}${e.utterance_id ? " id=" + e.utterance_id : ""}${e.latency_sec != null ? "  latency=" + e.latency_sec + "s" : ""}`)
         .join("\n");
-      $("logBox").textContent = log || "(empty)";
+      $("logBox").textContent =
+        (transitions ? "Transitions: " + transitions + "\n\n" : "") +
+        (log || "(empty)");
 
       if (a.connected && b.connected) {
-        setBanner("Both phones connected. Hold-to-speak on either phone to test the live pipeline.");
+        setBanner("Both phones connected. Continuous VAD half-duplex: A speaks → pause → B hears TTS → B speaks…");
       } else if (a.connected || b.connected) {
         setBanner("One phone connected. Scan the other QR code.", true);
       } else {

@@ -1,0 +1,20 @@
+# Dataset pipeline — global settings
+target_sample_count: 1000          # initial quality-first target (scale later)
+min_utterance_sec: 1.0
+max_utterance_sec: 18.0
+target_sample_rate: 16000          # matches phone_test / Whisper STT
+audio_channels: 1
+audio_format: wav
+shard_size: 250
+train_ratio: 0.8
+val_ratio: 0.1
+test_ratio: 0.1
+split_by: source_video             # never clip-level random split
+stt_min_confidence: 0.55
+quality_accept_threshold: 0.75
+quality_review_threshold: 0.45
+near_dup_text_threshold: 0.92
+resume: true
+bootstrap_from_benchmark: true     # seed text samples from existing corpora (not YouTube audio)
+max_discover_per_query: 8
+max_collect_videos: 40

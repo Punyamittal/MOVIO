@@ -29,11 +29,14 @@ COST_RESULTS_DIR = PROJECT_ROOT / "cost_analysis" / "results"
 REPORT_DIR = PROJECT_ROOT / "report"
 REFERENCE_VOICES_DIR = PROJECT_ROOT / "reference_voices"
 NORMALIZATION_DIR = PROJECT_ROOT / "normalization"
+DATASET_PIPELINE_DIR = PROJECT_ROOT / "dataset_pipeline"
+DATASET_PIPELINE_OUTPUT_DIR = DATASET_PIPELINE_DIR / "output"
 
 PRESERVE_ENGLISH_LIST_PATH = NORMALIZATION_DIR / "preserve_english_list.json"
 PRONUNCIATION_LEXICON_PATH = NORMALIZATION_DIR / "pronunciation_lexicon.json"
 TAXI_TEMPLATES_PATH = NORMALIZATION_DIR / "taxi_templates.json"
 VALIDATOR_FLAGS_LOG = NORMALIZATION_DIR / "validator_flags.log"
+TANGLISH_AUDIT_LOG = NORMALIZATION_DIR / "tanglish_audit.log"
 TANGLISH_GOLD_PAIRS_PATH = NORMALIZATION_DIR / "tanglish_gold_pairs.json"
 TRANSLATION_DEBUG_LOG = NORMALIZATION_DIR / "translation_debug.log"
 
@@ -124,6 +127,13 @@ TANGLISH_FEWSHOT_K = int(os.getenv("TANGLISH_FEWSHOT_K", "2"))
 # Default 0 for live TTFA: a failed call falls straight to offline/gold rather
 # than paying another multi-second model round-trip.
 TANGLISH_MAX_RETRIES = int(os.getenv("TANGLISH_MAX_RETRIES", "0"))
+
+# Non-Ollama Tanglish audit (gold / offline): meaning + Tamil/English mix ratio.
+TANGLISH_AUDIT_ENABLED = _flag("TANGLISH_AUDIT_ENABLED", "true")
+# Min Tamil-token share among content words (calibrated: gold corpus p10 ~0.55).
+TANGLISH_MIX_TAMIL_MIN = float(os.getenv("TANGLISH_MIX_TAMIL_MIN", "0.45"))
+# Max English-loanword share before flagging passthrough English.
+TANGLISH_MIX_ENGLISH_MAX = float(os.getenv("TANGLISH_MIX_ENGLISH_MAX", "0.70"))
 
 # Hallucination signals (thresholds, not absolute rules).
 TANGLISH_EXPANSION_RATIO = float(os.getenv("TANGLISH_EXPANSION_RATIO", "2.0"))

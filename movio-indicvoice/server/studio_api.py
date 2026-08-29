@@ -359,6 +359,32 @@ async def studio_normalize(body: NormalizeRequest):
     if not text:
         raise HTTPException(400, "text required")
     detected = detect_language(text)
+    target = (body.target_lang or detected or "tanglish").lower().strip()
+    if target in ("tamil", "ta-in"):
+        target = "ta"
+    if target in ("english", "en-in"):
+        target = "en"
+
+    # English → Tanglish must use the same translate path as POST /tts.
+    if target == "tanglish" and detected == "en":
+        from server.pipeline import preview_tts_text
+
+        normalized, meta = preview_tts_text(text, target_lang="tanglish")
+        return {
+            "ok": True,
+            "input": text,
+            "normalized": normalized,
+            "detected_lang": detected,
+            "target_lang": target,
+            "translator_engine": meta.get("translator_engine", ""),
+            "translated_text": meta.get("translated_text", ""),
+            "tanglish_audit": meta.get("tanglish_audit"),
+            "chars": len(text),
+            "transformations": 0,
+            "rules": [],
+            "tabs": ["Booking ID", "OTP", "Phone", "Time", "Currency+Distance", "Tanglish"],
+        }
+
     lex = _merged_lexicon(body.use_overrides)
     normalized, rules = _rule_breakdown(text, lex)
     # Ensure full pipeline match

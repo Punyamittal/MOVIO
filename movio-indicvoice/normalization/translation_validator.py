@@ -31,6 +31,8 @@ from config import (  # noqa: E402
     TANGLISH_REPEAT_LIMIT,
     TANGLISH_SHRINK_RATIO,
 )
+from normalization import tanglish_morphology as morphology  # noqa: E402
+from normalization import tanglish_vocab  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Tokenisation
@@ -92,11 +94,46 @@ _NUMBER_WORDS: dict[str, str] = {
     "onbadhu": "9",
     "ten": "10",
     "pathu": "10",
+    "eleven": "11",
+    "padhinonnu": "11",
+    "twelve": "12",
+    "panneendu": "12",
+    "thirteen": "13",
+    "padhimoonu": "13",
+    "fourteen": "14",
+    "padhinaalu": "14",
+    "fifteen": "15",
+    "padhinaindhu": "15",
+    "padhinanju": "15",
+    "sixteen": "16",
+    "padhinaaru": "16",
+    "seventeen": "17",
+    "padhinezhu": "17",
+    "eighteen": "18",
+    "padhinettu": "18",
+    "nineteen": "19",
+    "pathonbadhu": "19",
     "twenty": "20",
+    "irubathu": "20",
     "thirty": "30",
+    "muppathu": "30",
     "forty": "40",
+    "naapathu": "40",
     "fifty": "50",
+    "ambathu": "50",
+    "sixty": "60",
+    "arubathu": "60",
+    "seventy": "70",
+    "ezhubathu": "70",
+    "eighty": "80",
+    "enbathu": "80",
+    "ninety": "90",
+    "thonnooru": "90",
     "hundred": "100",
+    "nooru": "100",
+    "thousand": "1000",
+    "aayiram": "1000",
+    "ayiram": "1000",
 }
 
 # Capitalised words that are not place/person names.
@@ -110,6 +147,9 @@ _NOT_A_NAME = frozenset(
         "want", "tell", "ask", "let", "come", "go", "wait", "stop", "turn",
         "driver", "cab", "taxi", "otp", "pm", "am", "ok", "okay", "yes", "no",
         "hello", "hi", "thanks", "thank", "sorry", "sir", "madam",
+        # Domain acronyms — uppercase, but never person/place names.
+        "eta", "gps", "upi", "atm", "ac", "id", "sms", "app", "pin", "km",
+        "kms", "uber", "ola", "wifi", "pnr", "iap",
         "monday", "tuesday", "wednesday", "thursday", "friday", "saturday",
         "sunday", "today", "tomorrow", "tonight", "morning", "evening",
         "afternoon", "night",
@@ -135,7 +175,8 @@ _CONCEPTS: dict[str, frozenset[str]] = {
     "booking": frozenset({"booking", "book", "ride", "trip"}),
     "traffic": frozenset({"traffic", "jam", "nerisal", "போக்குவரத்து"}),
     "payment": frozenset(
-        {"payment", "pay", "fare", "cash", "upi", "gpay", "money", "rupees", "price"}
+        {"payment", "pay", "paid", "fare", "cash", "upi", "gpay", "money",
+         "rupees", "rupaa", "price", "charge"}
     ),
     "luggage": frozenset(
         {"luggage", "suitcase", "bag", "bags", "backpack", "saaman", "சாமான்"}
@@ -156,7 +197,34 @@ _CONCEPTS: dict[str, frozenset[str]] = {
     ),
     "hospital": frozenset({"hospital", "clinic", "pharmacy", "medical"}),
     "rain": frozenset({"rain", "raining", "mazhai", "wet"}),
+    "fuel": frozenset({"fuel", "petrol", "diesel", "gauge", "bunk", "tank"}),
 }
+
+# Kinship terms that must not appear unless the source mentions family relations.
+_KINSHIP_TERMS = frozenset(
+    {"thambi", "akka", "amma", "appa", "mama", "maama", "cousin", "sister", "brother"}
+)
+
+# Common model garbage — not valid spoken Tanglish tokens.
+# Curated non-words seen in production. "annuh" is deliberately absent: it is
+# the phonetic respelling of a correct "Anna" produced downstream for the TTS
+# engine, not something the translator invented.
+_GARBAGE_TOKENS = frozenset(
+    {"pahamilla", "paham", "petro", "bunnu", "petha", "petroli", "alaiyaa", "alaiya", "aga"}
+)
+
+# Entire English phrase with only a Tamil copula bolted on — not code-switching.
+_ENGLISH_CHUNK_COPULA = re.compile(
+    r"\b(?:my|your|our|the|this|that)\s+"
+    r"(?:(?!(?:naan|enakku|unga|irukk|pann|soll|vand|var|aag|theriy|illa|romba|konjam|"
+    r"ippo|indha|andha|edhu|enna|aana|nu|dhaan|vayitru|vayiru))\b"
+    r"[a-z]+\s+){2,}"
+    r"(?:irukku|irukka|irukken|irundhu)\b",
+    re.I,
+)
+
+# "-ko" is not a Tamil case suffix; gold corpus uses -ku, -a, -oda, -la, -nala.
+_INVALID_KO_SUFFIX = re.compile(r"\b\w+-ko\b", re.I)
 
 # Concepts whose unwanted appearance is the reported failure mode. Adding any
 # of these when the source never mentioned them is always a hard error.
@@ -218,8 +286,33 @@ def _stem(token: str) -> str:
     return t
 
 
+def _english_stems(token: str) -> set[str]:
+    """Base forms for English inflections so 'parked'/'pinned' match 'park'/'pin'.
+
+    Without this, a source that says "the vehicle is parked" and an output that
+    says "park pannirukku" looked like the model had *added* the parking concept.
+    """
+    out: set[str] = set()
+    t = token
+    if len(t) > 4 and t.endswith("ing"):
+        base = t[:-3]
+        out.update({base, base + "e"})
+        if len(base) > 2 and base[-1] == base[-2]:
+            out.add(base[:-1])
+    if len(t) > 3 and t.endswith("ed"):
+        base = t[:-2]
+        out.update({base, base + "e"})
+        if len(base) > 2 and base[-1] == base[-2]:
+            out.add(base[:-1])
+    if len(t) > 3 and t.endswith("es"):
+        out.add(t[:-2])
+    if len(t) > 3 and t.endswith("s") and not t.endswith("ss"):
+        out.add(t[:-1])
+    return out
+
+
 def concept_tokens(text: str) -> set[str]:
-    """Lowercase tokens plus their suffix-stripped stems."""
+    """Lowercase tokens plus Tanglish suffix stems and English inflection stems."""
     out: set[str] = set()
     for raw in re.split(r"[^A-Za-z\u0B80-\u0BFF]+", text or ""):
         if not raw:
@@ -227,6 +320,7 @@ def concept_tokens(text: str) -> set[str]:
         low = raw.lower()
         out.add(low)
         out.add(_stem(low))
+        out |= _english_stems(low)
     return out
 
 
@@ -277,6 +371,16 @@ def extract_entities(text: str, *, is_source: bool = True) -> Entities:
         val = _NUMBER_WORDS.get(w.lower())
         if val is not None:
             ent.numbers.add(val)
+
+    # Spoken Tanglish: oru/onnu before a noun is often "a/an", not the number 1.
+    if not is_source:
+        if re.search(
+            r"\b(?:oru|onnu)\s+(?:vandi|car|bag|package|suitcase|person|per|ride|"
+            r"thadava|time|mani|nimisham)\b",
+            t,
+            re.I,
+        ):
+            ent.numbers.discard("1")
 
     tokens = re.findall(r"\b[A-Za-z][A-Za-z']*\b", t)
     for i, tok in enumerate(tokens):
@@ -355,9 +459,70 @@ def check_repetition(output: str, limit: int | None = None) -> list[str]:
     return flags
 
 
+def _apply_spoken_number_equivalence(
+    src: Entities, out: Entities, source: str, output: str
+) -> None:
+    """Align English/Tanglish number phrasing so validator does not false-flag gold."""
+    src_low = (source or "").lower()
+    out_low = (output or "").lower()
+
+    if re.search(r"\btwo\s+hundred\b", src_low) or "200" in src.numbers:
+        if "rendu" in out_low and "nooru" in out_low:
+            src.numbers.discard("2")
+            src.numbers.discard("100")
+            out.numbers.discard("2")
+            out.numbers.discard("100")
+
+    if re.search(r"\b(?:an|one|1)\s+hour", src_low):
+        if re.search(r"\b(?:onnu|oru)\b", out_low) and "mani" in out_low:
+            src.numbers.discard("1")
+            out.numbers.discard("1")
+
+    # "next hour" / "for the next hour" → adutha oru mani neramukku (not digit 1).
+    if re.search(r"\bhour\b", src_low):
+        if re.search(r"\bmani\b", out_low) and re.search(r"\b(?:onnu|oru)\b", out_low):
+            out.numbers.discard("1")
+
+    if re.search(r"\bonce\b", src_low):
+        if re.search(r"\b(?:onnu|oru)\s+(?:thadava|time)\b", out_low):
+            out.numbers.discard("1")
+
+    if "twice" in src_low and "rendu" in out_low and "thadava" in out_low:
+        out.numbers.discard("2")
+
+    # Tamil marks indefiniteness with oru/onnu ("a vehicle", "one of the
+    # passengers"). When the source never counted, these are articles, not the
+    # number 1 — a real dropped count still surfaces as number_missing.
+    if "1" not in src.numbers and re.search(r"\b(?:oru|onnu)\b", out_low):
+        out.numbers.discard("1")
+
+    # "this one" / "the first one" are pronouns, not the number 1.
+    pronoun_ones = re.findall(
+        r"\b(?:this|that|which|another|the\s+other|first|second|third|last|next)\s+one\b",
+        src_low,
+    )
+    if pronoun_ones and len(re.findall(r"\bone\b", src_low)) == len(pronoun_ones):
+        src.numbers.discard("1")
+        # "the next one" → "adutha onnu": the mirror pronoun is not a count either.
+        if re.search(r"\b(?:oru|onnu)\b", out_low):
+            out.numbers.discard("1")
+
+    # "neither of us" → "rendu perukkum": rendu is the pair, not an added count.
+    if re.search(r"\b(?:both|neither|either)\s+of\s+(?:us|them|you)\b", src_low):
+        if re.search(r"\brendu\s+per", out_low) and "2" not in src.numbers:
+            out.numbers.discard("2")
+
+    # "a couple of minutes" → rendu nimisham (not an invented count).
+    if re.search(r"\bcouple\s+of\s+minutes?\b", src_low):
+        if re.search(r"\brendu\s+nimisham\b", out_low):
+            src.numbers.discard("2")
+            out.numbers.discard("2")
+
+
 def check_entities(source: str, output: str) -> list[str]:
     src = extract_entities(source, is_source=True)
     out = extract_entities(output, is_source=False)
+    _apply_spoken_number_equivalence(src, out, source, output)
     flags: list[str] = []
     out_low = (output or "").lower()
     out_tokens = concept_tokens(output)
@@ -413,17 +578,118 @@ def check_entities(source: str, output: str) -> list[str]:
     return flags
 
 
+def check_malformed_tanglish(source: str, output: str) -> tuple[list[str], list[str]]:
+    """Fluent-looking output that is not valid Tanglish.
+
+    Returns (hard, soft). Hard flags are grammatical facts that never occur in
+    the gold corpus — a stranded infinitive, a verb in a person the English
+    never licensed, a kinship term nobody mentioned. Soft flags are corpus
+    heuristics (unfamiliar vocabulary) that are too noisy to gate on: measured
+    against the gold pairs themselves, unknown-word density does not separate
+    real garbage from correct-but-novel Tanglish.
+    """
+    hard: list[str] = []
+    soft: list[str] = []
+    src_low = (source or "").lower()
+    out_low = (output or "").lower()
+
+    # A kinship term the source never introduced ("fuel gauge vera thambi").
+    # Matched with a trailing case suffix too, so "thambiya" is caught as well.
+    for kin in sorted(_KINSHIP_TERMS):
+        if re.search(rf"\b{re.escape(kin)}\w*\b", out_low) and not re.search(
+            rf"\b{re.escape(kin)}\w*\b", src_low
+        ):
+            hard.append(f"malformed:kinship_insert:{kin}")
+            break
+
+    # Curated non-words seen in production. Narrow by design — the corpus is
+    # too small to infer new ones reliably (see soft unknown_vocab below).
+    for junk in sorted(_GARBAGE_TOKENS):
+        if re.search(rf"\b{re.escape(junk)}\b", out_low):
+            hard.append(f"malformed:garbage_token:{junk}")
+            break
+
+    # "theriyum" (I know) truncated to a non-word stem.
+    if re.search(r"\btheri\b", out_low):
+        hard.append("malformed:truncated_stem:theri")
+
+    # A verb stranded in the infinitive where the main verb belongs. Never
+    # occurs in any of the gold pairs.
+    if morphology.CLAUSE_FINAL_INFINITIVE.search(output or ""):
+        hard.append("malformed:bare_infinitive_clause_final")
+
+    # The speaker announcing their own future action when the English did not.
+    if morphology.FIRST_SG_FUTURE.search(output or "") and not (
+        morphology.source_allows_first_sg_future(source)
+    ):
+        hard.append("malformed:person_1sg_future")
+
+    # A state turned into an action someone performs ("late pannuvanga").
+    if morphology.STATE_AS_ACTION.search(output or ""):
+        hard.append("malformed:state_as_action")
+
+    # A polite request rendered as a flat statement loses the ask entirely.
+    if morphology.is_suggestion(source) and not morphology.has_request_form(output):
+        hard.append("malformed:mood_suggestion_lost")
+    # Driver-directed "please avoid / please tell …" must land as -unga/-adheenga.
+    if re.search(
+        r"\bplease\s+(?:avoid|tell|ask|wait|stop|come|take|share|confirm|let|be|slow)\b",
+        src_low,
+    ) and not morphology.has_request_form(output):
+        hard.append("malformed:mood_suggestion_lost")
+
+    # Raw English chunk + copula only ("my stomach bad day irukku").
+    if _ENGLISH_CHUNK_COPULA.search(output or ""):
+        hard.append("malformed:english_chunk_collapse")
+
+    # "-ko" suffix (e.g. "stretch-ko") — not attested in the gold corpus.
+    if _INVALID_KO_SUFFIX.search(output or ""):
+        hard.append("malformed:invalid_ko_suffix")
+
+    # Source says avoid; output must not drop or invert it.
+    if re.search(r"\bavoid\b", src_low):
+        avoid_ok = re.search(
+            r"\b(?:avoid|vidama|venaam|edukadheenga|pokadheenga|pokkadheenga|"
+            r"pannadheenga)\b",
+            out_low,
+        )
+        if not avoid_ok:
+            hard.append("malformed:avoid_lost")
+        if re.search(r"\bpo\s+nu\b", out_low) and not re.search(r"\bavoid\b", out_low):
+            hard.append("malformed:avoid_inverted_go")
+
+    # Concessive "I know it's faster" misread as completed "went" on the road.
+    if re.search(r"\b(?:understand|know|faster|even if)\b", src_low):
+        if re.search(r"\b(?:road|route|bridge|highway)\s+pona\b", out_low):
+            if not re.search(r"\b(?:theriyum|irukum|fast-a)\b", out_low):
+                hard.append("malformed:concession_as_past")
+
+    if unknown := tanglish_vocab.unknown_tokens(output or "", source or ""):
+        soft.append(f"unknown_vocab:{','.join(unknown[:4])}")
+
+    return hard, soft
+
+
 def check_concepts(source: str, output: str) -> tuple[list[str], list[str]]:
     """Returns (hard_flags, soft_flags) for concept drift."""
     src = concepts_in(source)
     out = concepts_in(output)
     added = out - src
     dropped = src - out
-    hard = [f"concept_added:{c}" for c in sorted(added & _HIGH_RISK)]
-    soft = [f"concept_added_minor:{c}" for c in sorted(added - _HIGH_RISK)]
+
+    risky = set(_HIGH_RISK)
+    # Naming the vehicle is licensed once the source is already about a ride
+    # ("ask the driver to stop" → "vehicle-a stop panna driver-kitta sollunga").
+    if src & {"driver", "booking", "cab"}:
+        risky.discard("cab")
+
+    hard = [f"concept_added:{c}" for c in sorted(added & risky)]
+    soft = [f"concept_added_minor:{c}" for c in sorted(added - risky)]
     soft += [f"concept_dropped:{c}" for c in sorted(dropped)]
-    # Losing more than half the source concepts is real meaning loss.
-    if src and len(dropped) / len(src) > 0.5:
+    # Losing most of the source concepts is real meaning loss. Needs a big
+    # enough denominator: dropping the single detected concept of a one-concept
+    # sentence usually just means Tanglish phrased it without the loanword.
+    if len(src) >= 3 and len(dropped) >= 2 and len(dropped) / len(src) > 0.5:
         hard.append(f"meaning_loss:{len(dropped)}/{len(src)}")
     return hard, soft
 
@@ -459,7 +725,12 @@ def check_translated(source: str, output: str) -> list[str]:
     if _TANGLISH_MARKERS.search(output or ""):
         return []
     if _TAMIL_SCRIPT_RE.search(output or ""):
-        return []
+        # Spoken Tanglish for this pipeline is Latin code-mix. Tamil glyphs mixed
+        # with English words are interlinear glosses, not natural Tanglish.
+        latin_tokens = re.findall(r"\b[A-Za-z]{2,}\b", output or "")
+        if len(latin_tokens) >= 2:
+            return ["tamil_script_mixed"]
+        return ["tamil_script_only"]
 
     src_toks = {w.lower() for w in _words(source)}
     out_toks = {w.lower() for w in _words(output)}
@@ -508,7 +779,71 @@ _SOFT_PREFIXES = (
     "concept_dropped",
     "weak_tanglish",
     "name_missing",
+    "unknown_vocab",
 )
+
+
+# Retry guidance per malformed sub-kind. Describing the grammatical fault is
+# what steers a small model; naming the token it produced does not.
+_MALFORMED_REASONS: dict[str, str] = {
+    "kinship_insert": "you added a family term the source never mentioned",
+    "garbage_token": "you produced a word that does not exist in Tanglish",
+    "truncated_stem": "you cut a verb short into a non-word stem",
+    "bare_infinitive_clause_final": (
+        "you ended a clause on a bare infinitive; use the polite imperative "
+        "(-unga) or a finite verb"
+    ),
+    "person_1sg_future": (
+        "you used the 'I will' future when the speaker was not describing their "
+        "own future action"
+    ),
+    "state_as_action": (
+        "you turned a description into an action someone performs; a state like "
+        "'late' or 'empty' needs irukku/aayidichu, not pannuvanga"
+    ),
+    "mood_suggestion_lost": (
+        "the source asks politely, so the verb needs -alama or -unga, not a "
+        "flat statement"
+    ),
+    "english_chunk_collapse": (
+        "you dropped a raw English clause into the middle and only attached a "
+        "Tamil verb at the end; restructure the whole idea in Tanglish"
+    ),
+    "invalid_ko_suffix": (
+        "you used '-ko' as a suffix; Tamil uses -ku (dative), -a (object), "
+        "-oda (with), or -la (locative), not -ko"
+    ),
+    "avoid_lost": "the source asks to avoid something but your output never says avoid or an equivalent",
+    "avoid_inverted_go": (
+        "the source asks to avoid a stretch but you used 'po' (go) instead "
+        "of avoid/vidama/venaam"
+    ),
+    "concession_as_past": (
+        "you used past-tense 'pona' (went) where the source concedes a point "
+        "('I know it's faster, but…'); use a concessive like 'theriyum' or 'fast-a irukum'"
+    ),
+}
+
+# Malformed sub-kinds that should still be spoken as Tanglish rather than
+# falling back to English — register/person errors, not nonsense.
+_MALFORMED_NON_BLOCKING = frozenset(
+    {
+        "mood_suggestion_lost",
+        "bare_infinitive_clause_final",
+        "person_1sg_future",
+        "state_as_action",
+        "concession_as_past",
+    }
+)
+
+
+def malformed_blocks_fallback(flag: str) -> bool:
+    """Whether a malformed hard flag should force English passthrough."""
+    if not flag.startswith("malformed:"):
+        return False
+    parts = flag.split(":", 2)
+    kind = parts[1] if len(parts) > 1 else ""
+    return kind not in _MALFORMED_NON_BLOCKING
 
 
 @dataclass
@@ -548,6 +883,23 @@ class TranslationReport:
                 parts.append("you repeated the same words instead of finishing the sentence")
             elif kind == "not_translated":
                 parts.append("you returned English instead of Tanglish")
+            elif kind == "case_marker_wrong":
+                parts.append(
+                    "you used -ku (for/to) where -nala (because of) is needed for causal blocking"
+                )
+            elif kind == "stacked_vocative":
+                parts.append("you stacked vocatives (pick one: Anna, Ayya, or Brother)")
+            elif kind == "time_calque_trailing":
+                parts.append("you tacked the time clause at the end like English; put it before the verb")
+            elif kind == "malformed":
+                parts.append(_MALFORMED_REASONS.get(detail.split(":", 1)[0], "") or
+                             f"the output contains invalid Tanglish ({detail or kind})")
+            elif kind == "tamil_script_mixed":
+                parts.append(
+                    "you mixed Tamil script with English words (interlinear gloss, not Tanglish)"
+                )
+            elif kind == "tamil_script_only":
+                parts.append("you used Tamil script instead of Latin Tanglish")
             elif kind == "empty_output":
                 parts.append("you returned nothing")
             elif kind.startswith("meta_output") or kind == "multi_line_output":
@@ -556,6 +908,29 @@ class TranslationReport:
         seen: set[str] = set()
         uniq = [p for p in parts if not (p in seen or seen.add(p))]
         return "; ".join(uniq[:4])
+
+
+def check_case_markers(source: str, output: str) -> tuple[list[str], list[str]]:
+    """Flag fluent-but-wrong Tamil case suffixes (-ku vs -nala, stacked vocatives)."""
+    hard: list[str] = []
+    soft: list[str] = []
+    out_low = (output or "").lower()
+    src_low = (source or "").lower()
+
+    if re.search(r"\bayya\s+(?:brother|anna)\b", out_low) or re.search(
+        r"\bbrother\s+ayya\b", out_low
+    ):
+        soft.append("stacked_vocative")
+
+    # "-ku" is dative/purpose; blocking *because of* a procession needs "-nala".
+    if "procession" in src_low and re.search(r"\bblock", src_low):
+        if re.search(r"\bprocession\s+ku\s+block", out_low):
+            hard.append("case_marker_wrong:procession_ku_causal")
+
+    if re.search(r"next\s+hour", src_low) and re.search(r",\s*next hour-a\.?$", out_low):
+        soft.append("time_calque_trailing")
+
+    return hard, soft
 
 
 def validate_translation(source: str, output: str) -> TranslationReport:
@@ -569,7 +944,13 @@ def validate_translation(source: str, output: str) -> TranslationReport:
 
     hard += check_meta_output(output)
     hard += check_repetition(output)
+    m_hard, m_soft = check_malformed_tanglish(source, output)
+    hard += m_hard
+    soft += m_soft
     hard += check_entities(source, output)
+    cm_hard, cm_soft = check_case_markers(source, output)
+    hard += cm_hard
+    soft += cm_soft
     c_hard, c_soft = check_concepts(source, output)
     hard += c_hard
     soft += c_soft

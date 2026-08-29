@@ -19,9 +19,9 @@ import inspect
 import json
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Callable, Iterator
+from typing import Any, Callable, Iterator
 
 import sys
 
@@ -37,15 +37,16 @@ from config import (  # noqa: E402
     TEMPLATE_CACHE_ENABLED,
     TRANSLATOR_ENABLED,
 )
-from normalization.deterministic_normalizer import normalize  # noqa: E402
+from normalization.deterministic_normalizer import apply_lexicon, normalize  # noqa: E402
 from normalization.language_translator import (  # noqa: E402
     detect_language,
     translate as translate_text,
 )
+from normalization.pronunciation_rules import flatten_lexicon_entries  # noqa: E402
 from normalization.speakability import (  # noqa: E402
     is_latin_only_backend,
     latin_safe_lexicon,
-    prepare_for_latin_tts,
+    prepare_for_tanglish_tts,
     resolve_speak_target,
 )
 from normalization.tanglish_llm_layer import apply_tanglish_layer  # noqa: E402
@@ -140,7 +141,9 @@ def load_lexicon(path: Path = PRONUNCIATION_LEXICON_PATH) -> dict:
 
 
 def pronunciation_version(lexicon: dict | None = None, path: Path = PRONUNCIATION_LEXICON_PATH) -> str:
-    """Stable fingerprint of pronunciation config for cache invalidation."""
+    """Stable fingerprint of pronunciation + gold pairs for cache invalidation."""
+    from normalization.tanglish_translator import gold_pairs_version  # noqa: E402
+
     if lexicon is None:
         if path.exists():
             raw = path.read_bytes()
@@ -150,6 +153,7 @@ def pronunciation_version(lexicon: dict | None = None, path: Path = PRONUNCIATIO
         # Exclude meta keys from identity
         clean = {k: v for k, v in lexicon.items() if not str(k).startswith("_")}
         raw = json.dumps(clean, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    raw = raw + gold_pairs_version().encode("utf-8")
     return hashlib.sha256(raw).hexdigest()[:16]
 
 
@@ -241,9 +245,11 @@ class TTSPipeline:
     def _cache_identity(self, target_lang: str | None) -> dict:
         backend_name = getattr(self.backend, "name", "unknown")
         audio_format = getattr(self.backend, "audio_format", "wav")
+        # Recompute each request so gold/lexicon edits invalidate audio cache
+        # without requiring a full process restart.
         return {
             "target_language": (target_lang or self.target_lang or "tanglish"),
-            "pronunciation_version": self.pronunciation_version,
+            "pronunciation_version": pronunciation_version(self.lexicon),
             "tts_model_version": f"{backend_name}:{audio_format}",
             "audio_format": audio_format,
         }
@@ -280,6 +286,7 @@ class TTSPipeline:
 
         tr = translate_text(text, target_lang=tgt, enabled=self.translate_enabled)
         meta = {
+            "plain_text": "",
             "translated_text": tr.text,
             "detected_lang": tr.detected_lang or detected,
             "target_lang": tr.target_lang,
@@ -288,22 +295,43 @@ class TTSPipeline:
             "speak_adapted": latin_only and tgt != (requested or "").lower(),
             "indic_os_voice": has_indic,
         }
+        if tr.audit is not None:
+            meta["tanglish_audit"] = tr.audit
         logger.info(
             "preprocess translate engine=%s target=%s text_len=%d",
             tr.engine,
             tr.target_lang,
             len(tr.text or ""),
         )
-        lex = latin_safe_lexicon(self.lexicon) if latin_only else self.lexicon
-        det = normalize(tr.text, lexicon=lex)
-        # Optional LLM polish only when speaking Tanglish and LLM not skipped
-        if self.skip_llm or tr.target_lang not in ("tanglish", "auto") or latin_only:
+        lex_raw = load_lexicon()
+        lex_flat = flatten_lexicon_entries(lex_raw)
+        lex = latin_safe_lexicon(lex_flat) if latin_only else lex_flat
+        # Kept apart so template matching can see the plain spelling: the
+        # lexicon rewrites "driver" to "dryvur", which no template matches.
+        det_plain = normalize(tr.text)
+        det = apply_lexicon(det_plain, lex_flat) if lex_flat else det_plain
+        # Gold pairs are human-verified — never re-run the Tanglish LLM on them.
+        skip_tanglish_llm = tr.engine == "gold"
+        if (
+            self.skip_llm
+            or skip_tanglish_llm
+            or tr.target_lang not in ("tanglish", "auto")
+            or latin_only
+        ):
             spoken = det
         else:
             spoken = apply_tanglish_layer(det)
-        if latin_only:
-            spoken = prepare_for_latin_tts(spoken, lex)
+        if tr.target_lang in ("tanglish", "auto"):
+            spoken = prepare_for_tanglish_tts(
+                spoken,
+                backend_name=backend_name,
+                lexicon=lex,
+            )
         result = validate(text, spoken)
+        # Only offer the plain text when the lexicon was the sole difference;
+        # any later rewrite would leave the two texts out of step.
+        if spoken == det and result.text == spoken:
+            meta["plain_text"] = det_plain
         return result.text, result.ok, result.flags, meta
 
     def _raw_synth(
@@ -402,18 +430,33 @@ class TTSPipeline:
         audio, hit = self._synth_unit(unit, voice_style, ident, on_first_audio=_mark)
         return audio, hit, first_perf
 
-    def _decompose_utterance(self, normalized: str) -> list[SynthUnit]:
+    def _decompose_utterance(self, normalized: str, plain: str = "") -> list[SynthUnit]:
         clauses = split_clauses(normalized)
         if not clauses:
             return []
         if not self.clause_cache_enabled:
             return [SynthUnit(text=normalized, kind="clause")]
+        if not self.template_cache_enabled:
+            return [SynthUnit(text=c, kind="clause") for c in clauses]
+
+        # Templates are written in plain spelling, but the text we speak has
+        # been through the pronunciation lexicon. Match on the plain clause,
+        # then phoneticise each unit so the audio still matches the utterance.
+        plain_clauses = split_clauses(plain) if plain and plain != normalized else []
+        if len(plain_clauses) != len(clauses):
+            plain_clauses = []
+        lex = flatten_lexicon_entries(load_lexicon()) if plain_clauses else {}
+
         units: list[SynthUnit] = []
-        for clause in clauses:
-            if self.template_cache_enabled:
-                units.extend(self.templates.decompose(clause))
-            else:
-                units.append(SynthUnit(text=clause, kind="clause"))
+        for i, clause in enumerate(clauses):
+            match = self.templates.match(plain_clauses[i]) if plain_clauses else None
+            if match is not None:
+                units.extend(
+                    replace(u, text=apply_lexicon(u.text, lex)) if lex else u
+                    for u in match.units
+                )
+                continue
+            units.extend(self.templates.decompose(clause))
         return units
 
     def _peek_cached(self, unit: SynthUnit, voice_style: str, identity: dict) -> bool:
@@ -564,7 +607,7 @@ class TTSPipeline:
         normalized, v_ok, v_flags, meta = self.preprocess(text, target_lang=target_lang)
         voice_style = voice_style_for_target(voice_style, meta.get("target_lang") or target_lang)
         identity = self._cache_identity(meta.get("target_lang") or target_lang)
-        units = self._decompose_utterance(normalized)
+        units = self._decompose_utterance(normalized, meta.get("plain_text") or "")
         logger.info("Chunked TTS into %d unit(s)", len(units))
         first_ms = None
         for i, unit in enumerate(units):
@@ -680,7 +723,7 @@ class TTSPipeline:
                 return res
 
         timing.tts_started = time.perf_counter()
-        units = self._decompose_utterance(normalized_probe)
+        units = self._decompose_utterance(normalized_probe, meta.get("plain_text") or "")
         units = self._plan_units_for_cache(units, voice_style, identity)
         logger.info(
             "Layered TTS: %d unit(s) after full miss (clause=%s template=%s)",
@@ -874,6 +917,25 @@ class TTSPipeline:
         res.audio_duration_sec = duration
         res.audio_format = getattr(self.backend, "audio_format", "wav")
         return res
+
+
+def preview_tts_text(
+    text: str,
+    *,
+    target_lang: str = "tanglish",
+    backend_name: str = "edge_fast",
+) -> tuple[str, dict[str, Any]]:
+    """Full translate → normalize → phonetic path used by POST /tts (no audio)."""
+    pipe = TTSPipeline(
+        backend=get_backend(backend_name),
+        cache=None,
+        skip_llm=True,
+    )
+    spoken, ok, flags, meta = pipe.preprocess(text, target_lang=target_lang)
+    meta = dict(meta)
+    meta["validator_ok"] = ok
+    meta["validator_flags"] = flags
+    return spoken, meta
 
 
 if __name__ == "__main__":

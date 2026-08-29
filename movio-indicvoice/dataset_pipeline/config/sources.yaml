@@ -1,0 +1,29 @@
+# Acquisition sources — replaceable adapters
+adapters:
+  - youtube
+  - user_provided
+  - existing_corpora   # benchmark / gold / synthetic text (provenance recorded)
+
+youtube:
+  # Prefer Creative Commons / clearly licensed material only for audio download.
+  prefer_creative_commons: true
+  download_audio_if_usable: true
+  # If license unclear: metadata + captions only (usable_for_training=false)
+  allow_metadata_only: true
+  # Hard cap to stay lightweight on a laptop
+  max_results_per_query: 8
+  sleep_between_queries_sec: 1.5
+
+user_provided:
+  # Drop authorized WAV/MP3 + sidecar JSON into:
+  #   dataset_pipeline/output/raw/user_provided/
+  enabled: true
+
+existing_corpora:
+  # Text-only bootstrap from checked-in project data (no overwrite of those dirs)
+  paths:
+    - benchmark/data/offline_sentences.json
+    - benchmark/data/taxi_driver_sentences.json
+    - normalization/tanglish_gold_pairs.json
+  usable_for_training: true   # synthetic/internal reference text for Tanglish FT prep
+  source_label: existing_corpora

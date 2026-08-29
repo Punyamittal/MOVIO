@@ -18,11 +18,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from normalization.deterministic_normalizer import apply_lexicon  # noqa: E402
+from normalization.pronunciation_rules import flatten_lexicon_entries  # noqa: E402
 from server.cache import AudioCache  # noqa: E402
-from server.pipeline import TTSPipeline, pronunciation_version  # noqa: E402
+from server.pipeline import TTSPipeline, load_lexicon, pronunciation_version  # noqa: E402
 from server.templates import TemplateRegistry, get_template_registry  # noqa: E402
 from server.websocket_stream import concat_wavs  # noqa: E402
 from tts_backends.base import TTSBackend  # noqa: E402
+
+
+def _spoken(text: str) -> str:
+    """Text as the backend will receive it, after the pronunciation lexicon."""
+    return apply_lexicon(text, flatten_lexicon_entries(load_lexicon()))
 
 
 def _silent_wav(duration_sec: float = 0.3, sr: int = 22050, fingerprint: bytes = b"") -> bytes:
@@ -132,13 +139,15 @@ class TestClauseAndTemplateReuse(unittest.TestCase):
         calls_after_first = list(self.backend.calls)
         self.pipe.run(s10, "v", target_lang="en")
         # Cold path synthesizes the whole clause once, then warms the static prefix.
-        static = "Your driver will arrive"
+        # Units are spoken in the pronunciation lexicon's spelling ("driver" →
+        # "dryvur"), so derive the expected text instead of hardcoding it.
+        static = _spoken("Your driver will arrive")
         self.assertIn(static, calls_after_first)
         static_calls = [c for c in self.backend.calls if c == static]
         self.assertEqual(len(static_calls), 1, "static template unit must be synthesized once")
         # Second ETA must synthesize its own dynamic unit (not reuse five-minutes audio)
-        self.assertIn("in ten minutes.", self.backend.calls)
-        self.assertNotIn("in five minutes.", self.backend.calls)
+        self.assertIn(_spoken("in ten minutes."), self.backend.calls)
+        self.assertNotIn(_spoken("in five minutes."), self.backend.calls)
 
     def test_template_match_registry(self):
         reg = TemplateRegistry()
